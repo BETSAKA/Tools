@@ -1,5 +1,5 @@
 # Variables to be filled-in
-PROJ_NAME=my_project
+PROJ_NAME=$1
 
 # Creation of automatic variables
 WORK_DIR=/home/onyxia/work/${PROJ_NAME}
