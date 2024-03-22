@@ -6,6 +6,8 @@ WORK_DIR=/home/onyxia/work/${PROJ_NAME}
 REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/BETSAKA/${PROJ_NAME}.git # As initial
 
 # Git
+git config --global user.email "${GIT_USER_MAIL}"
+git config --global user.name "${GIT_USER_NAME}"
 git clone $REPO_URL $WORK_DIR
 chown -R onyxia:users $WORK_DIR
 
