@@ -1,11 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
-# Installs the latest GDAL version
-sudo apt-get autoremove gdal-bin libgdal-dev libgeos-dev libproj-dev 
+# Remove existing GDAL and related packages
+apt-get autoremove -y gdal-bin libgdal-dev libgeos-dev libproj-dev 
+
+# Remove 'sf' package in R
 Rscript -e "remove.packages('sf')"
-sudo apt-get update
-sudo apt-get install software-properties-common
-sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
-sudo apt-get update
-sudo apt-get install libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev
+
+# Update and install necessary packages
+apt-get update && \
+apt-get install -y software-properties-common && \
+add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
+apt-get update && \
+apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev
+
+# Install 'sf' package in R from source
 Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
