@@ -13,6 +13,7 @@ chown -R onyxia:users $WORK_DIR
 
 # Copy files from s3
 mc cp -r s3/fbedecarrats/diffusion/${PROJ_NAME} /home/onyxia/work/
+chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
 # Install additional packages passed as arguments
 if [ $# -gt 0 ]; then
