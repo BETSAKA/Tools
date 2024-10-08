@@ -11,6 +11,14 @@ REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/BETSAKA/${PROJ_NAME}.gi
 git clone $REPO_URL $WORK_DIR
 chown -R onyxia:users $WORK_DIR
 
+# Install additional packages passed as arguments
+if [ $# -gt 0 ]; then
+    for pkg in "$@"
+    do
+        Rscript -e "install.packages('$pkg')"
+    done
+fi
+
 # launch RStudio in the right project
 # Copied from InseeLab UtilitR
     echo \
