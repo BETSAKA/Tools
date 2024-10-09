@@ -36,6 +36,14 @@ fi
             rstudioapi::applyTheme('Merbivore')
             # Console where it should be
             rstudioapi::executeCommand('layoutConsoleOnRight')
-            }
-            }, action = 'append')
-            " >> /home/onyxia/work/.Rprofile
+        }
+    }, action = 'append')
+    " >> /home/onyxia/work/.Rprofile
+
+# Update RStudio keyboard shortcuts configuration
+mkdir -p /home/onyxia/.config/rstudio/keybindings
+cat <<EOT > /home/onyxia/.config/rstudio/keybindings/rstudio_bindings.json
+{
+    "pasteLastYank": null
+}
+EOT
