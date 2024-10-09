@@ -44,6 +44,6 @@ fi
 mkdir -p /home/onyxia/.config/rstudio/keybindings
 cat <<EOT > /home/onyxia/.config/rstudio/keybindings/rstudio_bindings.json
 {
-    "pasteLastYank": null
+    "pasteLastYank": ""
 }
 EOT
