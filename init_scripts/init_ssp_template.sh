@@ -1,3 +1,24 @@
+#!/bin/bash
+
+# First install an updated GDAL version ------------------------------
+# Remove existing GDAL and related packages
+apt-get autoremove -y gdal-bin libgdal-dev libgeos-dev libproj-dev 
+
+# Remove 'sf' package in R
+Rscript -e "remove.packages('sf')"
+
+# Update and install necessary packages
+apt-get update && \
+apt-get install -y software-properties-common && \
+add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
+apt-get update && \
+apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev
+
+# Install 'sf' package in R from source
+Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
+
+# Then set-up git and fetch S3 data ------------------------------------------------
+
 # Variables to be filled-in
 PROJ_NAME=$1
 
@@ -15,7 +36,7 @@ chown -R onyxia:users $WORK_DIR
 mc cp -r s3/fbedecarrats/diffusion/${PROJ_NAME} /home/onyxia/work/
 chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
-# Install additional packages passed as arguments
+# Install additional packages passed as arguments ---------------------------------
 if [ $# -gt 0 ]; then
     for pkg in "$@"
     do
@@ -23,6 +44,7 @@ if [ $# -gt 0 ]; then
     done
 fi
 
+# Set the UI ---------------------------------------------------------------------
 # launch RStudio in the right project
 # Copied from InseeLab UtilitR
     echo \
