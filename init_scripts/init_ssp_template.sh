@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# First install an updated GDAL version ------------------------------
 # Remove existing GDAL and related packages
 apt-get autoremove -y gdal-bin libgdal-dev libgeos-dev libproj-dev 
 
 # Remove 'sf' package in R
 Rscript -e "remove.packages('sf')"
+Rscript -e "remove.packages('terra')"
 
 # Update and install necessary packages
 apt-get update && \
@@ -16,6 +16,7 @@ apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite
 
 # Install 'sf' package in R from source
 Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
+Rscript -e "install.packages('terra', type = 'source', repos = 'https://cran.r-project.org/')"
 
 # Then set-up git and fetch S3 data ------------------------------------------------
 
