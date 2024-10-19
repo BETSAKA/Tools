@@ -18,7 +18,7 @@ apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite
 Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
 Rscript -e "install.packages('terra', type = 'source', repos = 'https://cran.r-project.org/')"
 
-# Then set-up git and fetch S3 data ------------------------------------------------
+# Then set-up git and fetch S3 data 
 
 # Variables to be filled-in
 PROJ_NAME=$1
@@ -37,7 +37,7 @@ chown -R onyxia:users $WORK_DIR
 mc cp -r s3/fbedecarrats/diffusion/${PROJ_NAME} /home/onyxia/work/
 chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
-# Install additional packages passed as arguments ---------------------------------
+# Install additional packages passed as arguments 
 if [ $# -gt 0 ]; then
     for pkg in "$@"
     do
@@ -45,7 +45,7 @@ if [ $# -gt 0 ]; then
     done
 fi
 
-# Set the UI ---------------------------------------------------------------------
+# Set the UI 
 # launch RStudio in the right project
 # Copied from InseeLab UtilitR
     echo \
