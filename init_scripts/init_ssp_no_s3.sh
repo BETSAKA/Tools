@@ -46,3 +46,15 @@ cat <<EOT > /home/onyxia/.config/rstudio/keybindings/rstudio_bindings.json
     "pasteLastYank": ""
 }
 EOT
+
+# Set RStudio user preferences to avoid saving/restoring workspace on session close
+mkdir -p /home/onyxia/.config/rstudio
+cat <<EOT > /home/onyxia/.config/rstudio/rstudio-prefs.json
+{
+    "save_workspace": "never",
+    "load_workspace": false,
+    "always_save_history": false,
+    "remove_history_duplicates": true,
+    "default_project_location": "$WORK_DIR"
+}
+EOT
