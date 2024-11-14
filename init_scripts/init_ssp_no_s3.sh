@@ -58,3 +58,5 @@ cat <<EOT > /home/onyxia/.config/rstudio/rstudio-prefs.json
     "default_project_location": "$WORK_DIR"
 }
 EOT
+
+chown -R onyxia:users /home/onyxia/
