@@ -11,7 +11,7 @@ REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/BETSAKA/${PROJ_NAME}.gi
 # git config --global user.email "${GIT_USER_MAIL}"
 # git config --global user.name "${GIT_USER_NAME}"
 git clone $REPO_URL $WORK_DIR
-chown -R onyxia:users $WORK_DIR
+chown -R onyxia:users /home/onyxia
 
 # Install additional packages passed as arguments 
 if [ $# -gt 0 ]; then
