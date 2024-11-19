@@ -5,50 +5,55 @@ PROJ_NAME=$1
 
 # Creation of automatic variables
 WORK_DIR=/home/onyxia/work/${PROJ_NAME}
-REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/BETSAKA/${PROJ_NAME}.git # As initial
+REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/BETSAKA/${PROJ_NAME}.git
 
 # Git
-# git config --global user.email "${GIT_USER_MAIL}"
-# git config --global user.name "${GIT_USER_NAME}"
 git clone $REPO_URL $WORK_DIR
 chown -R onyxia:users /home/onyxia
 
-# Install additional packages passed as arguments 
-if [ $# -gt 0 ]; then
-    for pkg in "$@"
+# Install additional R packages passed as arguments 
+if [ $# -gt 1 ]; then
+    for pkg in "${@:2}"  # Skip first argument (PROJ_NAME)
     do
         Rscript -e "install.packages('$pkg')"
     done
 fi
 
+# Ensure required dependencies are installed
+sudo apt-get update
+sudo apt-get install -y cmake build-essential
+
 # Download and build BLAKE3 C implementation
 cd /tmp
+if [ -d BLAKE3 ]; then
+    sudo rm -rf BLAKE3  # Ensure a clean start
+fi
 git clone https://github.com/BLAKE3-team/BLAKE3.git
 cd BLAKE3/c
+mkdir -p build  # Create a separate build directory
+cd build
+cmake ..
 make
-cp libblake3.a /usr/local/lib/
-cp blake3.h /usr/local/include/
+
+# Copy built files to system directories
+sudo cp libblake3.a /usr/local/lib/
+sudo cp ../blake3.h /usr/local/include/
 
 # Ensure environment is ready for Rcpp to link with BLAKE3
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 
 # Set the UI 
-# launch RStudio in the right project
-# Copied from InseeLab UtilitR
-    echo \
-    "
-    setHook('rstudio.sessionInit', function(newSession) {
-        if (newSession && !identical(getwd(), \"'$WORK_DIR'\"))
-        {
-            message('On charge directement le bon projet :-) ')
-            rstudioapi::openProject('$WORK_DIR')
-            # For a slick dark theme
-            rstudioapi::applyTheme('Merbivore')
-            # Console where it should be
-            rstudioapi::executeCommand('layoutConsoleOnRight')
-        }
-    }, action = 'append')
-    " >> /home/onyxia/work/.Rprofile
+echo "
+setHook('rstudio.sessionInit', function(newSession) {
+    if (newSession && !identical(getwd(), \"'$WORK_DIR'\"))
+    {
+        message('On charge directement le bon projet :-) ')
+        rstudioapi::openProject('$WORK_DIR')
+        rstudioapi::applyTheme('Merbivore')
+        rstudioapi::executeCommand('layoutConsoleOnRight')
+    }
+}, action = 'append')
+" >> /home/onyxia/work/.Rprofile
 
 # Update RStudio keyboard shortcuts configuration
 mkdir -p /home/onyxia/.config/rstudio/keybindings
@@ -58,7 +63,7 @@ cat <<EOT > /home/onyxia/.config/rstudio/keybindings/rstudio_bindings.json
 }
 EOT
 
-# Set RStudio user preferences to avoid saving/restoring workspace on session close
+# Set RStudio user preferences
 mkdir -p /home/onyxia/.config/rstudio
 cat <<EOT > /home/onyxia/.config/rstudio/rstudio-prefs.json
 {
@@ -70,4 +75,5 @@ cat <<EOT > /home/onyxia/.config/rstudio/rstudio-prefs.json
 }
 EOT
 
+# Correct permissions for the Onyxia user
 chown -R onyxia:users /home/onyxia/
