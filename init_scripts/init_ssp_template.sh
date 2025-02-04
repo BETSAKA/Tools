@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Variables to be filled-in
-PROJ_NAME=$1
-
+FULL_NAME="$1" # eg. "BETSAKA/training"
+PROJ_NAME="${FULL_NAME##*/}" # then "training"
 # Creation of automatic variables
 WORK_DIR=/home/onyxia/work/${PROJ_NAME}
-REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/BETSAKA/${PROJ_NAME}.git # As initial
+REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/${FULL_NAME}.git # As initial
 
 # Git
 # git config --global user.email "${GIT_USER_MAIL}"
