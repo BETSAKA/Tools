@@ -14,7 +14,7 @@ git clone $REPO_URL $WORK_DIR
 chown -R onyxia:users $WORK_DIR
 
 # Copy files from s3
-mc cp -r s3/projet-betsaka/diffusion/${PROJ_NAME} /home/onyxia/work/ 
+mc cp -r s3/projet-betsaka/diffusion/${PROJ_NAME}/data $WORK_DIR #Ne prendre que data
 chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
 # Install additional packages passed as arguments 
