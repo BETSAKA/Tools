@@ -10,7 +10,7 @@ fi
 PROJ_NAME=$1
 WORK_DIR=/home/onyxia/work/${PROJ_NAME}
 REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/BETSAKA/${PROJ_NAME}.git
-S3_PATH=s3/fbedecarrats/diffusion/${PROJ_NAME}
+S3_PATH=s3/projet-betsaka/diffusion/${PROJ_NAME}
 
 # Shift arguments to access additional packages (if any)
 shift
