@@ -66,9 +66,8 @@ chown -R onyxia:users $WORK_DIR
 
 # Step 9: Install additional R packages passed as arguments
 echo "[INFO] Installing additional R packages..."
-for pkg in "$@"
-do
-    Rscript -e "tryCatch({install.packages('$pkg')}, error=function(e){message('Retrying $pkg installation...'); Sys.sleep(10); install.packages('$pkg')})" || log_and_exit "Failed to install R package $pkg."
+for pkg in "$@"; do
+    install_R_package "$pkg"
 done
 
 # Step 10: Configure RStudio
