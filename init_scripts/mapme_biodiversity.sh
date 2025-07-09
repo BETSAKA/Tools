@@ -23,6 +23,7 @@ sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
 sudo apt-get update
 sudo apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev
 Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
+Rscript -e "install.packages('terra', type = 'source', repos = 'https://cran.r-project.org/')"
 
 # Install 'sf' package in R from source
 Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
