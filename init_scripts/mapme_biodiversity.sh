@@ -17,11 +17,11 @@ chown -R onyxia:users $WORK_DIR
 sudo apt-get autoremove -y gdal-bin libgdal-dev libgeos-dev libproj-dev 
 Rscript -e "remove.packages('sf')"
 Rscript -e "remove.packages('terra')"
-sudo apt-get update
-sudo apt-get install -y software-properties-common
-sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
-sudo apt-get update
-sudo apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev
+apt-get update
+apt-get install -y software-properties-common
+add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
+apt-get update
+apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev
 Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
 Rscript -e "install.packages('terra', type = 'source', repos = 'https://cran.r-project.org/')"
 
