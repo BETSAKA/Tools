@@ -12,13 +12,15 @@ REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/${FULL_NAME}.git # As i
 # git config --global user.name "${GIT_USER_NAME}"
 git clone $REPO_URL $WORK_DIR
 chown -R onyxia:users $WORK_DIR
-
-# Update and install necessary packages
-apt-get update && \
-apt-get install -y software-properties-common && \
-add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
-apt-get update && \
-apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev
+sudo apt-get autoremove gdal-bin libgdal-dev libgeos-dev libproj-dev 
+Rscript -e "remove.packages('sf')"
+Rscript -e "remove.packages('terra')"
+sudo apt-get update
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+sudo apt-get update
+sudo apt-get install libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev
+Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
 
 # Install 'sf' package in R from source
 Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
