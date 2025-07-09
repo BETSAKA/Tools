@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 # Variables to be filled-in
 FULL_NAME="$1" # eg. "BETSAKA/training"
