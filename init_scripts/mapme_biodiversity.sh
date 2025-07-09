@@ -13,10 +13,6 @@ REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/${FULL_NAME}.git # As i
 git clone $REPO_URL $WORK_DIR
 chown -R onyxia:users $WORK_DIR
 
-# Copy files from s3
-mc cp -r s3/projet-betsaka/diffusion/${PROJ_NAME}/data $WORK_DIR #Ne prendre que data
-chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
-
 # Update and upgrade the package list
 echo "[INFO] Updating package list..."
 apt-get update && apt-get upgrade -y || log_and_exit "Failed to update packages."
