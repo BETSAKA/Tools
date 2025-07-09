@@ -25,10 +25,6 @@ sudo apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libs
 Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
 Rscript -e "install.packages('terra', type = 'source', repos = 'https://cran.r-project.org/')"
 
-# Install 'sf' package in R from source
-Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
-Rscript -e "install.packages('terra', type = 'source', repos = 'https://cran.r-project.org/')"
-
 # Install additional packages passed as arguments 
 if [ $# -gt 0 ]; then
     for pkg in "$@"
