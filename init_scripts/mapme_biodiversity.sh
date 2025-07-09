@@ -13,21 +13,16 @@ REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/${FULL_NAME}.git # As i
 git clone $REPO_URL $WORK_DIR
 chown -R onyxia:users $WORK_DIR
 
-# Update and upgrade the package list
-echo "[INFO] Updating package list..."
-apt-get update && apt-get upgrade -y || log_and_exit "Failed to update packages."
+# Update and install necessary packages
+apt-get update && \
+apt-get install -y software-properties-common && \
+add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
+apt-get update && \
+apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev
 
-# Install necessary libraries if not present
-echo "[INFO] Installing necessary libraries..."
-apt-get install -y software-properties-common || log_and_exit "Failed to install software-properties-common."
-
-# Add the Ubuntugis PPA and update package list
-echo "[INFO] Adding Ubuntugis PPA..."
-add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && apt-get update || log_and_exit "Failed to add Ubuntugis PPA."
-
-# Install GDAL, GEOS, and PROJ libraries
-echo "[INFO] Installing GDAL, GEOS, PROJ, and other libraries..."
-apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev || log_and_exit "Failed to install geospatial libraries."
+# Install 'sf' package in R from source
+Rscript -e "install.packages('sf', type = 'source', repos = 'https://cran.r-project.org/')"
+Rscript -e "install.packages('terra', type = 'source', repos = 'https://cran.r-project.org/')"
 
 # Install additional packages passed as arguments 
 if [ $# -gt 0 ]; then
