@@ -38,6 +38,10 @@ if [ $# -gt 0 ]; then
     done
 fi
 
+# Copy files from s3
+mc cp -r s3/projet-betsaka/${PROJ_NAME} /home/onyxia/work/
+chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
+
 # Set the UI 
 # launch RStudio in the right project
 # Copied from InseeLab UtilitR
