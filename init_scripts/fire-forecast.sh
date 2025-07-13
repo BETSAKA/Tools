@@ -39,7 +39,8 @@ if [ $# -gt 0 ]; then
 fi
 
 # Copy files from s3
-mc cp -r s3/projet-betsaka/PA_impacts_fires /home/onyxia/work/
+mc cp -r s3/projet-betsaka/PA_impacts_fires/data /home/onyxia/work/${PROJ_NAME}
+mc cp -r s3/projet-betsaka/PA_impacts_fires/mapme /home/onyxia/work/${PROJ_NAME}
 chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
 # Set the UI 
