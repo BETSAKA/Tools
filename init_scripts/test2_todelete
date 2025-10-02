@@ -1,4 +1,4 @@
 
 #!/bin/bash
 
-mc cp s3/projet-betsaka/diffusion/mapme/accessibility_2000/acc_50k.tif /home/onyxia
+mc cp s3/projet-betsaka/diffusion/mapme/accessibility_2000/acc_50k.tif /home/onyxia/work
