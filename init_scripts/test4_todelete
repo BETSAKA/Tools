@@ -1,0 +1,4 @@
+
+#!/bin/bash
+
+mc cp -r s3/projet-betsaka/diffusion/mapme /home/onyxia/work
