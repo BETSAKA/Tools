@@ -1,4 +1,0 @@
-
-#!/bin/bash
-
-mc cp -r s3/projet-betsaka/diffusion/PA-impact-on-deforestation/mapme /home/onyxia/work
