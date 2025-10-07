@@ -63,7 +63,6 @@ jq '. + {
     "redhat.telemetry.enabled": true,
     "git.suggestSmartCommit": false
 }' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"# Path to the VSCode settings.json file
-SETTINGS_FILE="${SETTINGS}/settings.json"
 
 # INSTALL VSCODE extensions
 
