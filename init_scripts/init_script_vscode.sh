@@ -24,7 +24,7 @@ chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
 # Set vscode settings
 # Path to the VSCode settings.json file
-SETTINGS_FILE="${HOME}/.local/share/code-server/User/settings.json"
+SETTINGS_FILE="/home/onyxia/.local/share/code-server/User/settings.json"
 
 # Check if the settings.json file exists, otherwise create a new one
 if [ ! -f "$SETTINGS_FILE" ]; then
