@@ -11,6 +11,7 @@ FULL_NAME="$1" # eg. "BETSAKA/training"
 PROJ_NAME="${FULL_NAME##*/}" # then "training"
 # Creation of automatic variables
 WORK_DIR=/home/onyxia/work/${PROJ_NAME} # then "/home/onyxia/work/training"
+code-server $WORK_DIR
 REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/${FULL_NAME}.git # then "github.com/BETSAKA/training"
 
 # Clone git repo
