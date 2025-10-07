@@ -8,7 +8,6 @@
 
 # Parses the argument from the onyxia init 
 FULL_NAME="$1" # eg. "BETSAKA/training"
-SETTINGS="$2"
 PROJ_NAME="${FULL_NAME##*/}" # then "training"
 # Creation of automatic variables
 WORK_DIR=/home/onyxia/work/${PROJ_NAME} # then "/home/onyxia/work/training"
@@ -24,6 +23,45 @@ chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
 # Set vscode settings
 # Path to the VSCode settings.json file
+SETTINGS_FILE="${HOME}/.local/share/code-server/User/settings.json"
+
+# Check if the settings.json file exists, otherwise create a new one
+if [ ! -f "$SETTINGS_FILE" ]; then
+    echo "No existing settings.json found. Creating a new one."
+    mkdir -p "$(dirname "$SETTINGS_FILE")"
+    echo "{}" > "$SETTINGS_FILE"  # Initialize with an empty JSON object
+fi
+
+# Add or modify Python-related settings using jq
+# We will keep the comments outside the jq block, as jq doesn't support comments inside JSON.
+jq '. + {
+    "r.bracketedPaste": true,
+    "editor.acceptSuggestionOnEnter": "off",
+    "git.confirmSync": false,
+    "r.lsp.diagnostics": false,
+    "workbench.colorTheme": "Monokai",
+    "r.plot.defaults.fullWindowMode": true,
+    "editor.minimap.enabled": false,
+    "editor.wordWrap": "on",
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    "terminal.integrated.cursorStyle": "line",
+    "terminal.integrated.cursorBlinking": true,
+    "python.terminal.activateEnvironment": false,
+    "settingsSync.ignoredSettings": [
+        "-python.defaultInterpreterPath"
+    ],
+    "diffEditor.ignoreTrimWhitespace": false,
+    "r.removeLeadingComments": true,
+    "editor.codeActionsOnSave": {},
+    "diffEditor.useInlineViewWhenSpaceIsLimited": false,
+    "r.plot.useHttpgd": true,
+    "editor.accessibilitySupport": "off",
+    "github.copilot.editor.enableAutoCompletions": true,
+    "jupyter.askForKernelRestart": false,
+    "notebook.output.scrolling": true,
+    "redhat.telemetry.enabled": true,
+    "git.suggestSmartCommit": false
+}' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"# Path to the VSCode settings.json file
 SETTINGS_FILE="${SETTINGS}/settings.json"
 
 # INSTALL VSCODE extensions
