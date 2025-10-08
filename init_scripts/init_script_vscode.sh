@@ -47,7 +47,7 @@ jq '. + {
      # "terminal.integrated.enableMultiLinePasteWarning": "never",
      # "terminal.integrated.cursorStyle": "line",
      # "terminal.integrated.cursorBlinking": true,
-
+    "r.plot.useHttpgd": true,
      # "r.removeLeadingComments": true,
 
     "flake8.args": [
@@ -86,8 +86,8 @@ jq '. + {
 #     "git.suggestSmartCommit": false
 # }' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"# Path to the VSCode settings.json file
 
-# Open folder
-code-server $WORK_DIR &
+# # Open folder
+# code-server $WORK_DIR &
 
 # INSTALL VSCODE extensions
 
