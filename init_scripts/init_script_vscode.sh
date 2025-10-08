@@ -112,5 +112,5 @@ code-server --install-extension copilot.vsix
 code-server --install-extension copilot-chat.vsix
 rm copilot.vsix copilot-chat.vsix
 
-# # Open folder
-# code-server "$WORK_DIR"
+# Open folder
+code-server "$WORK_DIR"
