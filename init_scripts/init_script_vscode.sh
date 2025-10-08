@@ -38,15 +38,15 @@ fi
 # We will keep the comments outside the jq block, as jq doesn't support comments inside JSON.
 jq '. + {
     # "workbench.colorTheme": "Monokai",  # Set the theme
-    # "workbench.panel.defaultLocation": "right",
+    "workbench.panel.defaultLocation": "right",
 
     "editor.rulers": [80, 100, 120],  # Add specific vertical rulers
     "files.trimTrailingWhitespace": true,  # Automatically trim trailing whitespace
     "files.insertFinalNewline": true,  # Ensure files end with a newline
 
      # "terminal.integrated.enableMultiLinePasteWarning": "never",
-     # "terminal.integrated.cursorStyle": "line",
-     # "terminal.integrated.cursorBlinking": true,
+     "terminal.integrated.cursorStyle": "line",
+     "terminal.integrated.cursorBlinking": true,
     "r.plot.useHttpgd": true,
      # "r.removeLeadingComments": true,
 
