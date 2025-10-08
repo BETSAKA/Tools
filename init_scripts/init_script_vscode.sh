@@ -37,7 +37,6 @@ fi
 # Add or modify Python-related settings using jq
 # We will keep the comments outside the jq block, as jq doesn't support comments inside JSON.
 jq '. + {
-    "workbench.colorTheme": "Monokai",  # Set the theme
     "workbench.panel.defaultLocation": "right",
     "workbench.editor.openSideBySideDirection": "down"
 
