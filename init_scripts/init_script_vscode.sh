@@ -47,7 +47,6 @@ jq '. + {
      # "terminal.integrated.enableMultiLinePasteWarning": "never",
      "terminal.integrated.cursorStyle": "line",
      "terminal.integrated.cursorBlinking": true,
-     "terminal.integrated.startIn": "panel",
      
     "r.plot.useHttpgd": true,
      # "r.removeLeadingComments": true,
