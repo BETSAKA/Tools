@@ -22,9 +22,6 @@ chown -R onyxia:users $WORK_DIR
 mc cp -r s3/projet-betsaka/${PROJ_NAME} /home/onyxia/work/
 chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
-# Open folder
-code-server $WORK_DIR
-
 # Set vscode settings
 # Path to the VSCode settings.json file
 # Path to the VSCode settings.json file
@@ -88,6 +85,9 @@ jq '. + {
 #     "redhat.telemetry.enabled": true,
 #     "git.suggestSmartCommit": false
 # }' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"# Path to the VSCode settings.json file
+
+# Open folder
+code-server $WORK_DIR
 
 # INSTALL VSCODE extensions
 
