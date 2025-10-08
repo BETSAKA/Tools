@@ -23,7 +23,7 @@ mc cp -r s3/projet-betsaka/${PROJ_NAME} /home/onyxia/work/
 chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
 # Open folder
-code-server "$WORK_DIR" &
+code-server "$WORK_DIR"
 
 # Set vscode settings
 # Path to the VSCode settings.json file
