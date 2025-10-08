@@ -37,18 +37,18 @@ fi
 # Add or modify Python-related settings using jq
 # We will keep the comments outside the jq block, as jq doesn't support comments inside JSON.
 jq '. + {
-    "workbench.colorTheme": "Monokai",  # Set the theme
-    "workbench.panel.defaultLocation": "right",
+    # "workbench.colorTheme": "Monokai",  # Set the theme
+    # "workbench.panel.defaultLocation": "right",
 
     "editor.rulers": [80, 100, 120],  # Add specific vertical rulers
     "files.trimTrailingWhitespace": true,  # Automatically trim trailing whitespace
     "files.insertFinalNewline": true,  # Ensure files end with a newline
 
-     "terminal.integrated.enableMultiLinePasteWarning": "never",
-     "terminal.integrated.cursorStyle": "line",
-     "terminal.integrated.cursorBlinking": true,
+     # "terminal.integrated.enableMultiLinePasteWarning": "never",
+     # "terminal.integrated.cursorStyle": "line",
+     # "terminal.integrated.cursorBlinking": true,
 
-     "r.removeLeadingComments": true,
+     # "r.removeLeadingComments": true,
 
     "flake8.args": [
         "--max-line-length=100"  # Max line length for Python linting
