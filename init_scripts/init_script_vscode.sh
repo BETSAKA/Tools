@@ -113,4 +113,4 @@ code-server --install-extension copilot-chat.vsix
 rm copilot.vsix copilot-chat.vsix
 
 # Open folder
-code-server "$WORK_DIR"
+code-server --folder-uri $WORK_DIR
