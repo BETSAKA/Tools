@@ -87,7 +87,7 @@ jq '. + {
 # }' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"# Path to the VSCode settings.json file
 
 # Open folder
-code-server $WORK_DIR
+code-server $WORK_DIR &
 
 # INSTALL VSCODE extensions
 
