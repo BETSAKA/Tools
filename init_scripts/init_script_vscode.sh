@@ -38,7 +38,7 @@ fi
 # We will keep the comments outside the jq block, as jq doesn't support comments inside JSON.
 jq '. + {
     "workbench.panel.defaultLocation": "right",
-    "workbench.editor.openSideBySideDirection": "down"
+    "workbench.editor.openSideBySideDirection": "down",
 
     "editor.rulers": [80, 100, 120],  # Add specific vertical rulers
     "files.trimTrailingWhitespace": true,  # Automatically trim trailing whitespace
