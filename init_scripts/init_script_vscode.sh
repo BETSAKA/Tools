@@ -25,6 +25,7 @@ chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
 # Set vscode settings
 # Path to the VSCode settings.json file
+# Path to the VSCode settings.json file
 SETTINGS_FILE="${HOME}/.local/share/code-server/User/settings.json"
 
 # Check if the settings.json file exists, otherwise create a new one
@@ -37,33 +38,47 @@ fi
 # Add or modify Python-related settings using jq
 # We will keep the comments outside the jq block, as jq doesn't support comments inside JSON.
 jq '. + {
-    "r.bracketedPaste": true,
-    "editor.acceptSuggestionOnEnter": "off",
-    "git.confirmSync": false,
-    "r.lsp.diagnostics": false,
-    "workbench.colorTheme": "Monokai",
-    "r.plot.defaults.fullWindowMode": true,
-    "editor.minimap.enabled": false,
-    "editor.wordWrap": "on",
-    "terminal.integrated.enableMultiLinePasteWarning": "never",
-    "terminal.integrated.cursorStyle": "line",
-    "terminal.integrated.cursorBlinking": true,
-    "python.terminal.activateEnvironment": false,
-    "settingsSync.ignoredSettings": [
-        "-python.defaultInterpreterPath"
-    ],
-    "diffEditor.ignoreTrimWhitespace": false,
-    "r.removeLeadingComments": true,
-    "editor.codeActionsOnSave": {},
-    "diffEditor.useInlineViewWhenSpaceIsLimited": false,
-    "r.plot.useHttpgd": true,
-    "editor.accessibilitySupport": "off",
-    "github.copilot.editor.enableAutoCompletions": true,
-    "jupyter.askForKernelRestart": false,
-    "notebook.output.scrolling": true,
-    "redhat.telemetry.enabled": true,
-    "git.suggestSmartCommit": false
-}' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"# Path to the VSCode settings.json file
+    "workbench.colorTheme": "Default Dark Modern",  # Set the theme
+
+    "editor.rulers": [80, 100, 120],  # Add specific vertical rulers
+    "files.trimTrailingWhitespace": true,  # Automatically trim trailing whitespace
+    "files.insertFinalNewline": true,  # Ensure files end with a newline
+
+    "flake8.args": [
+        "--max-line-length=100"  # Max line length for Python linting
+    ]
+}' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+
+# Add or modify Python-related settings using jq
+# We will keep the comments outside the jq block, as jq doesn't support comments inside JSON.
+# jq '. + {
+#     "r.bracketedPaste": true,
+#     "editor.acceptSuggestionOnEnter": "off",
+#     "git.confirmSync": false,
+#     "r.lsp.diagnostics": false,
+#     "workbench.colorTheme": "Monokai",
+#     "r.plot.defaults.fullWindowMode": true,
+#     "editor.minimap.enabled": false,
+#     "editor.wordWrap": "on",
+#     "terminal.integrated.enableMultiLinePasteWarning": "never",
+#     "terminal.integrated.cursorStyle": "line",
+#     "terminal.integrated.cursorBlinking": true,
+#     "python.terminal.activateEnvironment": false,
+#     "settingsSync.ignoredSettings": [
+#         "-python.defaultInterpreterPath"
+#     ],
+#     "diffEditor.ignoreTrimWhitespace": false,
+#     "r.removeLeadingComments": true,
+#     "editor.codeActionsOnSave": {},
+#     "diffEditor.useInlineViewWhenSpaceIsLimited": false,
+#     "r.plot.useHttpgd": true,
+#     "editor.accessibilitySupport": "off",
+#     "github.copilot.editor.enableAutoCompletions": true,
+#     "jupyter.askForKernelRestart": false,
+#     "notebook.output.scrolling": true,
+#     "redhat.telemetry.enabled": true,
+#     "git.suggestSmartCommit": false
+# }' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"# Path to the VSCode settings.json file
 
 # INSTALL VSCODE extensions
 
