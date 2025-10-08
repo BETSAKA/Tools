@@ -22,6 +22,9 @@ chown -R onyxia:users $WORK_DIR
 mc cp -r s3/projet-betsaka/${PROJ_NAME} /home/onyxia/work/
 chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
+# Open folder
+code-server $WORK_DIR
+
 # Set vscode settings
 # Path to the VSCode settings.json file
 # Path to the VSCode settings.json file
@@ -112,5 +115,3 @@ code-server --install-extension copilot.vsix
 code-server --install-extension copilot-chat.vsix
 rm copilot.vsix copilot-chat.vsix
 
-# Open folder
-code-server --folder-uri $WORK_DIR
