@@ -37,8 +37,9 @@ fi
 # Add or modify Python-related settings using jq
 # We will keep the comments outside the jq block, as jq doesn't support comments inside JSON.
 jq '. + {
-    # "workbench.colorTheme": "Monokai",  # Set the theme
+    "workbench.colorTheme": "Monokai",  # Set the theme
     "workbench.panel.defaultLocation": "right",
+    "workbench.editor.openSideBySideDirection": "down"
 
     "editor.rulers": [80, 100, 120],  # Add specific vertical rulers
     "files.trimTrailingWhitespace": true,  # Automatically trim trailing whitespace
@@ -47,6 +48,8 @@ jq '. + {
      # "terminal.integrated.enableMultiLinePasteWarning": "never",
      "terminal.integrated.cursorStyle": "line",
      "terminal.integrated.cursorBlinking": true,
+     "terminal.integrated.startIn": "panel",
+     
     "r.plot.useHttpgd": true,
      # "r.removeLeadingComments": true,
 
