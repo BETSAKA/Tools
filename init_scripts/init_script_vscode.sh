@@ -12,7 +12,7 @@ FULL_NAME="$1" # eg. "BETSAKA/training"
 PROJ_NAME="${FULL_NAME##*/}" # then "training"
 # Creation of automatic variables
 WORK_DIR=/home/onyxia/work/${PROJ_NAME} # then "/home/onyxia/work/training"
-# code-server "$WORK_DIR"
+code-server "$WORK_DIR" &
 REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/${FULL_NAME}.git # then "github.com/BETSAKA/training"
 
 # Clone git repo
@@ -38,11 +38,18 @@ fi
 # Add or modify Python-related settings using jq
 # We will keep the comments outside the jq block, as jq doesn't support comments inside JSON.
 jq '. + {
-    "workbench.colorTheme": "Default Dark Modern",  # Set the theme
+    "workbench.colorTheme": "Monokai",  # Set the theme
+    "workbench.panel.defaultLocation": "right",
 
     "editor.rulers": [80, 100, 120],  # Add specific vertical rulers
     "files.trimTrailingWhitespace": true,  # Automatically trim trailing whitespace
     "files.insertFinalNewline": true,  # Ensure files end with a newline
+
+     "terminal.integrated.enableMultiLinePasteWarning": "never",
+     "terminal.integrated.cursorStyle": "line",
+     "terminal.integrated.cursorBlinking": true,
+
+     "r.removeLeadingComments": true,
 
     "flake8.args": [
         "--max-line-length=100"  # Max line length for Python linting
