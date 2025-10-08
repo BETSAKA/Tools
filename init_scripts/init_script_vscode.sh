@@ -2,8 +2,9 @@
 
 # This script is exectued at onyxia pod startup to:
 # - clone a github repository specified as first Onyxia init argument "user_or_org/repo"
-# - install the packages listed as onyxia init argument after the repo name (space separated)
-# - copy on the pod local storage the content of the s3 folder named "projet-betsaka/user/data"
+# - copy on the pod local storage the content of the s3 folder named "projet-betsaka"
+# - change VSCode main settings
+# - install main VSCode extensions 
 
 
 # Parses the argument from the onyxia init 
@@ -24,7 +25,7 @@ chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
 # Set vscode settings
 # Path to the VSCode settings.json file
-SETTINGS_FILE="/home/onyxia/.local/share/code-server/User/settings.json"
+SETTINGS_FILE="$HOME/.local/share/code-server/User/settings.json"
 
 # Check if the settings.json file exists, otherwise create a new one
 if [ ! -f "$SETTINGS_FILE" ]; then
@@ -89,5 +90,3 @@ gzip -d copilot-chat.vsix.gz
 code-server --install-extension copilot.vsix
 code-server --install-extension copilot-chat.vsix
 rm copilot.vsix copilot-chat.vsix
-
-EOT
