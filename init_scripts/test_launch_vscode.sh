@@ -16,17 +16,12 @@ chown -R onyxia:users $WORK_DIR
 mc cp -r s3/projet-betsaka/${PROJ_NAME} /home/onyxia/work/
 chown -R onyxia:users $WORK_DIR # make sure users have rights to edit
 
-# Set vscode settings
-# Path to the VSCode settings.json file
-# Path to the VSCode settings.json file
-SETTINGS_FILE="${HOME}/.local/share/code-server/User/settings.json"
+# Set startup folder
+VSCODE_ARGS_DIR="${HOME}/.local/share/code-server"
+mkdir -p "$VSCODE_ARGS_DIR"
 
-# Check if the settings.json file exists, otherwise create a new one
-if [ ! -f "$SETTINGS_FILE" ]; then
-    echo "No existing settings.json found. Creating a new one."
-    mkdir -p "$(dirname "$SETTINGS_FILE")"
-    echo "{}" > "$SETTINGS_FILE"  # Initialize with an empty JSON object
-fi
-
-
-code-server --user-data-dir ~/.local/share/code-server --extensions-dir ~/.local/share/code-server/extensions "$WORK_DIR"
+cat > "${VSCODE_ARGS_DIR}/argv.json" <<EOF
+{
+  "openInFolder": "${WORK_DIR}"
+}
+EOF
