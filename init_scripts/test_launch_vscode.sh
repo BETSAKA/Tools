@@ -28,4 +28,5 @@ if [ ! -f "$SETTINGS_FILE" ]; then
     echo "{}" > "$SETTINGS_FILE"  # Initialize with an empty JSON object
 fi
 
-code-server --user-data-dir ~/.local/share/code-server --extensions-dir ~/.local/share/code-server/extensions "$WORK_DIR" &
+
+code-server --user-data-dir ~/.local/share/code-server --extensions-dir ~/.local/share/code-server/extensions "$WORK_DIR"
