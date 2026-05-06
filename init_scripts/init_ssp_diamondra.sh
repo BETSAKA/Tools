@@ -3,6 +3,8 @@
 # Variables to be filled-in
 FULL_NAME="$1" # eg. "BETSAKA/training"
 PROJ_NAME="${FULL_NAME##*/}" # then "training"
+FOLD_NAME="$2" # eg. "projet-betsaka/PA-impact-deforestation" 
+shift 2
 # Creation of automatic variables
 WORK_DIR=/home/onyxia/work/${PROJ_NAME}
 REPO_URL=https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/${FULL_NAME}.git # As initial
