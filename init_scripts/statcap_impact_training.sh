@@ -22,29 +22,29 @@ log_and_exit() {
 }
 
 # Step 1: Update and upgrade the package list
-echo "[INFO] Updating package list..."
-apt-get update && apt-get upgrade -y || log_and_exit "Failed to update packages."
+#echo "[INFO] Updating package list..."
+#apt-get update && apt-get upgrade -y || log_and_exit "Failed to update packages."
 
 # Step 2: Install necessary libraries if not present
-echo "[INFO] Installing necessary libraries..."
-apt-get install -y software-properties-common || log_and_exit "Failed to install software-properties-common."
+#echo "[INFO] Installing necessary libraries..."
+#apt-get install -y software-properties-common || log_and_exit "Failed to install software-properties-common."
 
 # Step 3: Add the Ubuntugis PPA and update package list
-echo "[INFO] Adding Ubuntugis PPA..."
-add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && apt-get update || log_and_exit "Failed to add Ubuntugis PPA."
+#echo "[INFO] Adding Ubuntugis PPA..."
+#add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && apt-get update || log_and_exit "Failed to add Ubuntugis PPA."
 
 # Step 4: Remove any existing GDAL, GEOS, and PROJ libraries to ensure a clean update
-echo "[INFO] Removing existing GDAL, GEOS, and PROJ libraries..."
-apt-get remove -y gdal-bin libgdal-dev libgeos-dev libproj-dev || true
-apt-get autoremove -y || true
+#echo "[INFO] Removing existing GDAL, GEOS, and PROJ libraries..."
+#apt-get remove -y gdal-bin libgdal-dev libgeos-dev libproj-dev || true
+#apt-get autoremove -y || true
 
 # Step 5: Install the latest versions of GDAL, GEOS, and PROJ libraries from the Ubuntugis PPA
-echo "[INFO] Installing the latest versions of GDAL, GEOS, PROJ, and other libraries..."
-apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev || log_and_exit "Failed to install geospatial libraries."
+#echo "[INFO] Installing the latest versions of GDAL, GEOS, PROJ, and other libraries..."
+#apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libsqlite0-dev || log_and_exit "Failed to install geospatial libraries."
 
 # Step 6: Remove and reinstall 'sf' and 'terra' packages in R
-echo "[INFO] Removing and reinstalling 'sf' and 'terra' R packages..."
-Rscript -e "remove.packages(c('sf', 'terra'))" || true
+#echo "[INFO] Removing and reinstalling 'sf' and 'terra' R packages..."
+#Rscript -e "remove.packages(c('sf', 'terra'))" || true
 
 install_R_package() {
     local pkg=$1
