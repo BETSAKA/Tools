@@ -1,21 +1,44 @@
+---
+title: "Comparing Protected Areas selection in 3 BETSAKA Working Units"
+format: html
+editor_options: 
+  chunk_output_type: console
+--- 
 
 
 
 ## Code used for PA selection
 
-Here we describe the code used to select the protected areas (PAs) analysed in 3 working packages (WU1.1 on deforestation, WU1.2 on fires, and WU2.1 on livelihoods).
+The code used to select the protected areas (PAs) analysed in 3 working packages (WU1.1 on deforestation, WU1.2 on fires, and WU2.1 on livelihoods) is in:
+- `wu_snippets\deforestation_01-treatment-assignation.qmd`
+- `wu_snippets\fire_01_data_acquisition.qmd`
+- `wu_snippets\livelihoods_02_treatment_status.qmd`
 
-First we used the package git2r to fetch the corresponding repositories.
+### WU1.1: Deforestation
+*   **Data Source**: WDPA Madagascar (July 2025 version) [line 110](wu_snippets/deforestation_01-treatment-assignation.qmd#L110).
+*   **PA List adjustments**:
+    *   Integrates a legal analysis of "early protections" (temporarily protected areas or definitive creations not in WDPA) from `data/legal_texts.rds` [line 95](wu_snippets/deforestation_01-treatment-assignation.qmd#L95).
+    *   Filters for `STATUS == "Designated"` and excludes polygons that are not `POLYGON` or `MULTIPOLYGON` [lines 114-119](wu_snippets/deforestation_01-treatment-assignation.qmd#L114-L119).
+    *   Treats `STATUS_YR` based on legal dates when available [lines 126-129](wu_snippets/deforestation_01-treatment-assignation.qmd#L126-L129).
 
-```{r}
-library(tidyverse)
-library(git2r)
+### WU1.2: Fires
+*   **Data Source**: Uses a dynamic database (`dynamic_wdpa.gpkg`) synchronized with [conservation-dynamic-madagascar](https://betsaka.github.io/conservation-dynamic-madagascar) [line 431](wu_snippets/fire_01_data_acquisition.qmd#L431).
+*   **PA List adjustments**:
+    *   Filters for terrestrial and mixed areas (`MARINE %in% 0:1`) [line 432](wu_snippets/fire_01_data_acquisition.qmd#L432).
+    *   Removes Ramsar sites [line 442](wu_snippets/fire_01_data_acquisition.qmd#L442).
+    *   Fixes metadata for over 150 PAs using a large `case_match` block to harmonize names and manager information [lines 201-412](wu_snippets/fire_01_data_acquisition.qmd#L201-L412).
 
-# Fetch 
-```
+NB : it also combines cleaned WDPA data with priority sites (used as controls for some analysis) from SAPM evolution 2012 [lines 448-464](wu_snippets/fire_01_data_acquisition.qmd#L448-L464).
+
+### WU2.1: Livelihoods
+*   **Data Source**: WDPA October 2025 version [line 26](wu_snippets/livelihoods_02_treatment_status.qmd#L26).
+*   **PA List adjustments**:
+    *   Cross-references with **SAPM 2017 corrected** shapefile for validated creation dates [line 53](wu_snippets/livelihoods_02_treatment_status.qmd#L53).
+    *   Prioritizes SAPM years (`SAPM_YEAR`) over WDPA years (`WDPA_YEAR`) when discrepancies exist [lines 75-81](wu_snippets/livelihoods_02_treatment_status.qmd#L75-L81).
+    *   Strict exclusion of: `UNESCO-MAB Biosphere Reserve`, `Ramsar Site`, and `World Heritage Site` [lines 33-35](wu_snippets/livelihoods_02_treatment_status.qmd#L33-L35).
+    *   Normalizes names for consistency (e.g., "Zombitse Vohibasia" to "Zombitse-Vohibasia") [lines 44-46](wu_snippets/livelihoods_02_treatment_status.qmd#L44-L46).
+
+## List comparison
 
 
-## Data sources
 
-
-## Filtering conditions
