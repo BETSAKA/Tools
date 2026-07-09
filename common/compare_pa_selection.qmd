@@ -1,0 +1,21 @@
+
+
+
+## Code used for PA selection
+
+Here we describe the code used to select the protected areas (PAs) analysed in 3 working packages (WU1.1 on deforestation, WU1.2 on fires, and WU2.1 on livelihoods).
+
+First we used the package git2r to fetch the corresponding repositories.
+
+```{r}
+library(tidyverse)
+library(git2r)
+
+# Fetch 
+```
+
+
+## Data sources
+
+
+## Filtering conditions
