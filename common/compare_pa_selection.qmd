@@ -1,10 +1,12 @@
 ---
 title: "Comparing Protected Areas selection in 3 BETSAKA Working Units"
-format: html
+format: 
+  html:
+    output-file: index.html
+    output-dir: ../docs
 editor_options: 
   chunk_output_type: console
 --- 
-
 
 
 ## Code used for PA selection
@@ -14,31 +16,656 @@ The code used to select the protected areas (PAs) analysed in 3 working packages
 - `wu_snippets\fire_01_data_acquisition.qmd`
 - `wu_snippets\livelihoods_02_treatment_status.qmd`
 
-### WU1.1: Deforestation
-*   **Data Source**: WDPA Madagascar (July 2025 version) [line 110](wu_snippets/deforestation_01-treatment-assignation.qmd#L110).
-*   **PA List adjustments**:
-    *   Integrates a legal analysis of "early protections" (temporarily protected areas or definitive creations not in WDPA) from `data/legal_texts.rds` [line 95](wu_snippets/deforestation_01-treatment-assignation.qmd#L95).
-    *   Filters for `STATUS == "Designated"` and excludes polygons that are not `POLYGON` or `MULTIPOLYGON` [lines 114-119](wu_snippets/deforestation_01-treatment-assignation.qmd#L114-L119).
-    *   Treats `STATUS_YR` based on legal dates when available [lines 126-129](wu_snippets/deforestation_01-treatment-assignation.qmd#L126-L129).
+```{r}
+knitr::opts_knit$set(root.dir = normalizePath(".."))
+```
 
-### WU1.2: Fires
-*   **Data Source**: Uses a dynamic database (`dynamic_wdpa.gpkg`) synchronized with [conservation-dynamic-madagascar](https://betsaka.github.io/conservation-dynamic-madagascar) [line 431](wu_snippets/fire_01_data_acquisition.qmd#L431).
-*   **PA List adjustments**:
-    *   Filters for terrestrial and mixed areas (`MARINE %in% 0:1`) [line 432](wu_snippets/fire_01_data_acquisition.qmd#L432).
-    *   Removes Ramsar sites [line 442](wu_snippets/fire_01_data_acquisition.qmd#L442).
-    *   Fixes metadata for over 150 PAs using a large `case_match` block to harmonize names and manager information [lines 201-412](wu_snippets/fire_01_data_acquisition.qmd#L201-L412).
+### Code in WU 1.1
 
-NB : it also combines cleaned WDPA data with priority sites (used as controls for some analysis) from SAPM evolution 2012 [lines 448-464](wu_snippets/fire_01_data_acquisition.qmd#L448-L464).
+- Source data: July 2025 WDPA extract for Madagascar and `data/legal_texts.rds`.
+- PA selection: designated PAs plus PAs identified through the legal review; polygon and multipolygon geometries intersecting Madagascar.
+- Modifications: replace `STATUS_YR` with the earliest legal year when available and set Ambohimirahavavy Marivorahona (`WDPAID == 555697871`) to 2015.
 
-### WU2.1: Livelihoods
-*   **Data Source**: WDPA October 2025 version [line 26](wu_snippets/livelihoods_02_treatment_status.qmd#L26).
-*   **PA List adjustments**:
-    *   Cross-references with **SAPM 2017 corrected** shapefile for validated creation dates [line 53](wu_snippets/livelihoods_02_treatment_status.qmd#L53).
-    *   Prioritizes SAPM years (`SAPM_YEAR`) over WDPA years (`WDPA_YEAR`) when discrepancies exist [lines 75-81](wu_snippets/livelihoods_02_treatment_status.qmd#L75-L81).
-    *   Strict exclusion of: `UNESCO-MAB Biosphere Reserve`, `Ramsar Site`, and `World Heritage Site` [lines 33-35](wu_snippets/livelihoods_02_treatment_status.qmd#L33-L35).
-    *   Normalizes names for consistency (e.g., "Zombitse Vohibasia" to "Zombitse-Vohibasia") [lines 44-46](wu_snippets/livelihoods_02_treatment_status.qmd#L44-L46).
+```{r}
+library(tidyverse)
+library(sf)
+library(wdpar)
+library(geodata)
 
-## List comparison
+# Systèmes de coordonnées de référence 
+standard_crs <- 4326
+mdg_crs <- 29702 
+
+# Load the work implemented in: https://betsaka.github.io/conservation-dynamic-madagascar/03_legal_docs.html
+legal_texts <- read_rds("data/legal_texts.rds")
+
+# Use the legal analysis made from CNLEGIS to identify early protections
+# that are not registered in WDPA: 
+legal_years <- legal_texts |>
+  filter(str_detect(type_decision, "creation_definitive|mise_protection_temporaire")) |>
+  mutate(
+    date_texte = as.Date(date_texte),
+    legal_year = year(date_texte)
+  ) |>
+  group_by(WDPAID) |>
+  summarize(
+    legal_year = min(legal_year, na.rm = TRUE),
+    .groups = "drop"
+  )
 
 
+# Load WDPA data
+wdpa <- wdpa_read("data/WDPA_WDOECM_Jul2025_Public_MDG.zip") %>%
+ # wdpa_clean() |> # This might cause to drop existing PAs!
+ # Include PAs that exist according to the legal analysis
+  filter(STATUS == "Designated" | WDPAID %in% legal_years$WDPAID) %>%
+  mutate(MARINE = recode(MARINE,
+                         "0" = "Terrestre",
+                         "1" = "Mixte",
+                         "2" = "Marine"),
+        GEOMETRY_TYPE = st_geometry_type(.)) %>%
+  filter(GEOMETRY_TYPE %in% c("POLYGON", "MULTIPOLYGON"),)
 
+# Make sure join keys have compatible types
+legal_years <- legal_years |> mutate(WDPAID = as.numeric(WDPAID))
+wdpa <- wdpa |> mutate(WDPAID = as.numeric(WDPAID))
+
+# Join and replace STATUS_YR where a legal year exists
+wdpa <- wdpa |>
+  left_join(legal_years, by = "WDPAID") |>
+  mutate(
+    STATUS_YR = if_else(!is.na(legal_year), as.integer(legal_year), STATUS_YR)
+  ) |>
+  select(-legal_year)
+
+# Load boundary
+contour_mada <- gadm(country = "Madagascar", level = 0, path = "data") %>%
+  st_as_sf() %>%
+  st_set_crs(standard_crs)
+
+# Intersection des AP de WDPA avec la limite de Madagascar
+wdpa_terrestre <- wdpa %>% 
+  st_transform(crs = standard_crs) %>%
+  st_make_valid() %>%
+  st_intersection(contour_mada) %>% 
+  st_transform(mdg_crs) %>%
+  mutate(
+    area_m2  = as.numeric(st_area(.)),
+    area_ha  = area_m2 / 1e4,
+    area_km2 = area_m2 / 1e6
+  ) %>%
+  st_transform(standard_crs)
+
+# Ajout de la date de création du complexe des aires protégées Ambohimirahavavy Marivorahona 
+
+pa_wu11 <- wdpa_terrestre %>%
+  mutate(STATUS_YR = ifelse(WDPAID == 555697871, 2015, STATUS_YR))
+
+# clean intermediary objects
+rm(codelist, contour_mada, legal_texts, legal_years, wdpa, wdpa_terrestre)
+```
+
+### Code in WU 1.2
+
+- Source data: `data/dynamic_wdpa.gpkg`.
+- PA selection: terrestrial and mixed PAs (`MARINE %in% 0:1`) with Ramsar and inscribed records removed.
+- Modifications: derive `STATUS_YR_DYN`, collapse multiple status rows to one row per PA, set Ambohimirahavavy Marivorahona (`WDPAID == 555697871`) to 2015, and harmonize names, IUCN categories, and management authority fields.
+
+```{r}
+library(terra)
+library(tidyterra)
+library(pbapply)
+
+pa_wu12 <- vect("data/dynamic_wdpa.gpkg") %>%
+  dplyr::filter(MARINE %in% 0:1) %>%
+    # "Complexe des  AP Ambohimirahavavy Marivorahona" does not have a STATUS_YR, we set it to 2015 as per WDPA website: https://protectedareas.mg/fr/landscape/show/79?geoShapeFilterField=location&location=48.727807188419%2C-14.2119746670021%2C49.0930733591917%2C-14.2119746670021%2C49.0930733591917%2C-13.734131335043%2C48.727807188419%2C-13.734131335043%2C48.727807188419%2C-14.2119746670021&max=8&mediaFilter=no_of_images%2Cno_of_videos%2Cno_of_audio&offset=0&sort=created_on&view=stats
+  mutate(
+    STATUS_YR_DYN = case_when(
+      WDPAID == 555697871 ~ 2015,
+      STATUS == "Proposed" ~ 2026,
+      TRUE ~ as.integer(STATUS_YR)
+    ),
+    WDPAID = as.integer(WDPAID)
+  ) %>%
+  # remove RAMSAR, see https://github.com/BETSAKA/PA-impact-on-deforestation/issues/46
+  filter(DESIG != "Ramsar Site, Wetland of International Importance") %>%
+  filter(STATUS != "Inscribed") %>%
+  select(WDPAID, NAME, DESIG, MANG_AUTH, IUCN_CAT, STATUS, STATUS_YR_DYN, zone_type)
+
+# ### Load Prioritaire protected areas
+# # Load site prioritaire ap and harmonized variables
+# prioritaire_ap <- vect("./data/source/pa_history_mdg/sapm_evolution_2012/commondata/data1/site_prioritaire_ap.shp") %>%
+#   mutate(
+#     WDPAID = as.integer(paste0("666000", row_number())),
+#     NAME = paste0("Prioritaire_", row_number()),
+#     DESIG = "Prioritaire AP",
+#     MANG_AUTH = "Prioritaire AP",
+#     IUCN_CAT = "Prioritaire AP",
+#     STATUS = "Prioritaire AP",
+#     STATUS_YR_DYN = 2026,
+#     zone_type = "external_boundary"
+#   ) %>%
+#   select(WDPAID, NAME, DESIG, MANG_AUTH, IUCN_CAT, STATUS, STATUS_YR_DYN, zone_type) %>%
+#   project(dynamic_wdpa_vect)
+
+# dynamic_pa_vect <- rbind(dynamic_wdpa_vect, prioritaire_ap)
+
+pa_wu12 <- pa_wu12 %>%
+  as.data.frame() %>%
+  dplyr::filter(zone_type == "external_boundary") %>%
+  group_by(WDPAID) %>%
+  mutate(
+    STATUS_YR = min(STATUS_YR_DYN, na.rm = TRUE),
+    STATUS_YR_WDPA = max(STATUS_YR_DYN),
+    STATUS_YR_PERM = min(STATUS_YR_DYN[DESIG != "Protection Temporaire"])
+  ) %>%
+  ungroup() %>%
+  arrange(WDPAID, STATUS_YR) %>%
+  group_by(WDPAID) %>%
+  slice_tail(n=1) %>%
+  ungroup() %>%
+  mutate(
+    STATUS_YR_PERM = ifelse(is.infinite(STATUS_YR_PERM), 2026, STATUS_YR_PERM),
+    # For those without websites, IUCN_CAT is based on status (Décret 2015-005)
+    # Paysage Harmonieux protégée = V
+    # Réserve naturelle = IV
+    # Parc naturel = II
+    IUCN_CAT = case_when(
+      WDPAID == 352239 ~ "IV",  # Analamerana (RS)
+      WDPAID == 555547961 ~ "V", # Mandrozo (PHP): FAPBM.org/aire_protegee/mandrozo
+      WDPAID == 555697872 ~ "VI", # Antrema (RRN): ProtectedPlanet.net/555697872
+      WDPAID == 555697914 ~ "V", # Bombetoka Beloboka (PHP): FAPBM.org/aire_protegee/bombetoka
+      WDPAID == 555697915 ~ "V", # Ambohidray (PHP): mbev.univ-antananarivo.mg/Ambohidray.php
+      WDPAID == 555697916 ~ "V", # Ambararata Londa (PHP)
+      WDPAID == 555549449 ~ "V", # Vohidefo (PHP)
+      WDPAID == 555549450 ~ "V", # Angavo (PHP)
+      WDPAID == 555549451 ~ "V", # Behara-Tranomaro (PHP)
+      WDPAID == 555549452 ~ "V", # Sud-Ouest Ifotaky (PHP)
+      WDPAID == 555549460 ~ "V", # Ranobe PK 32 (PHP)
+      WDPAID == 555697871 ~ "II", # Ambohimirahavavy Marivorahona (PN)
+      WDPAID == 555790172 ~ "V", # Ankafobe (PHP)
+      WDPAID == 555790168 ~ "Protection temporaire", # Tsinjoarivo Ambalaomby, still temporary
+      STATUS == "Proposed" ~ "Proposed AP",
+      TRUE ~ IUCN_CAT
+    ),
+    SHORT_NAME = case_match(NAME,
+    "Betampona"                                              ~ "Betampona",
+    "Tsimanampesotse"                                        ~ "Tsimanampe",
+    "Befotaka Midongy"                                       ~ "Befotaka",
+    "Isalo"                                                  ~ "Isalo",
+    "Mantadia"                                               ~ "Mantadia",
+    "Mananara Nord"                                          ~ "Mananara",
+    "Ranomafana"                                             ~ "Ranomafana",
+    "Tsaratanana"                                            ~ "Tsarata.",
+    "Masoala"                                                ~ "Masoala",
+    "Baie de Baly"                                           ~ "Baie Baly",
+    "Bemaraha"                                               ~ "Bemaraha",
+    "Marojejy"                                               ~ "Marojejy",
+    "Andringitra"                                            ~ "Andringi.",
+    "Namoroka"                                               ~ "Namoroka",
+    "Mikea"                                                  ~ "Mikea",
+    "Makira"                                                 ~ "Makira",
+    "Ankarafantsika"                                         ~ "Ankaraf.",
+    "Andohahela"                                             ~ "Andohahela",
+    "Montagne d'Ambre"                                       ~ "Mont Ambre",
+    "Analamazaotra"                                          ~ "Analamaz.",
+    "Analamerana"                                            ~ "Analamer.",
+    "Zombitse Vohibasia"                                     ~ "Zombitse",
+    "Zahamena"                                               ~ "Zahamena",
+    "Complexe des lacs Ambondro et Sirave (CLAS)"            ~ "CLAS Lakes",
+    "Marolambo"                                              ~ "Marolambo",
+    "Zones Humides Ankarafantsika  (CLSA)"                   ~ "CLSA Ank.",
+    "Analavelona"                                            ~ "Analavelon",
+    "Allées des Baobabs"                                     ~ "Baobabs",
+    "Bemarivo"                                               ~ "Bemarivo",
+    "Bora"                                                   ~ "Bora",
+    "Kasijy"                                                 ~ "Kasijy",
+    "Maningoza"                                              ~ "Maningoza",
+    "Ambohijanahary"                                         ~ "Ambohijan.",
+    "Ambatovaky"                                             ~ "Ambatovaky",
+    "Mangerivola"                                            ~ "Mangeri.",
+    "Kalambatrika"                                           ~ "Kalamba.",
+    "Tampoketsa Analamaitso"                                 ~ "Tampoketsa",
+    "Manombo"                                                ~ "Manombo",
+    "Ivohibe"                                                ~ "Ivohibe",
+    "Ambohitantely"                                          ~ "Ambohita.",
+    "Beza Mahafaly"                                          ~ "Beza Maha.",
+    "Le Lac Alaotra : Les Zones Humides et Bassins Versants" ~ "Lac Alaotra",
+    "Anjanaharibe_sud"                                       ~ "Anjanaha.",
+    "Ankarana"                                               ~ "Ankarana",
+    "Manongarivo"                                            ~ "Manongari.",
+    "Marotandrano"                                           ~ "Marotandra",
+    "Nosy Mangabe"                                           ~ "Nosy Manga",
+    "Andranomena"                                            ~ "Andranome.",
+    "Cap Sainte Marie"                                       ~ "Cap Ste Ma",
+    "Analalava"                                              ~ "Analalava",
+    "Réserve spéciale Pointe à Larrée"                       ~ "Pte Larree",
+    "Kinkony Lake"                                           ~ "Kinkony Lk",
+    "Site Bioculturel d'Antrema"                             ~ "Antrema",
+    "Complexe Tsimembo Manambolomaty"                        ~ "Tsimembo",
+    "Parc Alarobia"                                          ~ "Alarobia",
+    "Zones humides de Bedo"                                  ~ "Bedo",
+    "Rivière Nosivolo et affluents"                          ~ "Nosivo Af",
+    "Lac Mandrozo"                                           ~ "Mandrozo",
+    "Complexe Anjozorobe Angavo"                             ~ "Anjozorobe",
+    "Ankodida"                                               ~ "Ankodida",
+    "Corridor forestier Bongolava"                           ~ "Bongolava",
+    "Nord fotaky"                                            ~ "Fotaky",
+    "Mandena"                                                ~ "Mandena",
+    "Menabe Antimena"                                        ~ "Menabe Ant",
+    "Ambohitr'Antsingy Montagne des Français"                ~ "Mont Franc",
+    "Amoron'i Onilahy"                                       ~ "Amoro Onil",
+    "Ambatoatsinanana"                                       ~ "Ambatoatsi",
+    "Réserve de Tampolo"                                     ~ "Tampolo",
+    "Rivière Nosivolo"                                       ~ "Nosivolo",
+    "Complexe Lac Forêt Ambondrobe"                          ~ "Lac Ambond.",
+    "Complexe Zones Humides Mangoky Ihotry"                  ~ "Mangoky",
+    "Beanka"                                                 ~ "Beanka",
+    "Sahafina"                                               ~ "Sahafina",
+    "Corridor Forestier Ambositra Vondrozo"                  ~ "Ambositra",
+    "Massif d'Itremo"                                        ~ "Itremo",
+    "Ambatofotsy"                                            ~ "Ambatofo.",
+    "Ampotaka Ankorabe"                                      ~ "Ampotaka",
+    "Ampanganandehibe-Behasina"                              ~ "Ampanga.",
+    "Ampasindava"                                            ~ "Ampasindav",
+    "Galoko Kalobinono"                                      ~ "Galoko Kal",
+    "Oronjia"                                                ~ "Oronjia",
+    "Massif d'Ibity"                                         ~ "Ibity",
+    "Forêt Naturel de Petriky"                               ~ "Petriky",
+    "Andreba"                                                ~ "Andreba",
+    "COMATSA Sud"                                            ~ "COMATSA S",
+    "Bemanevika"                                             ~ "Bemanevika",
+    "Loky Manambato"                                         ~ "Loky Manam",
+    "Andrafiamena Andavakoera"                               ~ "Andrafiame",
+    "Complexe des Zones Humides de Bemanevika"               ~ "ZH Bemane.",
+    "Zones humides de l'Onilahy"                             ~ "Onilahy",
+    "Anjajavy"                                               ~ "Anjajavy",
+    "Ivohiboro"                                              ~ "Ivohiboro",
+    "Corridor Ankeniheny Zahamena"                           ~ "Ankeniheny",
+    "Forêt Naturelle de Tsitongambarika"                     ~ "Tsitongamb",
+    "Maromizaha"                                             ~ "Maromizaha",
+    "Mangabe-Ranomena-Sahasarotra"                           ~ "Mangabe",
+    "Analabe-Betanatanana"                                   ~ "Analabe",
+    "Agnalazaha"                                             ~ "Agnalazaha",
+    "Makirovana Tsihomanaomby"                               ~ "Makirovana",
+    "Vohidava Betsimalao"                                    ~ "Vohidava",
+    "Ankarabolava"                                           ~ "Ankarabola",
+    "Agnakatrika"                                            ~ "Agnakatri.",
+    "Mahimborondro"                                          ~ "Mahimboron",
+    "COMATSA Nord"                                           ~ "COMATSA N",
+    "Manjakatompo Ankaratra"                                 ~ "Ankaratra",
+    "Zones humides d'Ambondrobe"                             ~ "ZH Ambond.",
+    "Parc national Tsimanampesotse"                          ~ "PN Tsimana",
+    "Torotorofotsy"                                          ~ "Torotorofo",
+    "Ambatotsirongorongo"                                    ~ "Ambatotsir",
+    "Vohidefo"                                               ~ "Vohidefo",
+    "Angavo"                                                 ~ "Angavo",
+    "Behara-Tranomaro"                                       ~ "Behara",
+    "Sud-Ouest Ifotaky"                                      ~ "Ifotaky",
+    "Ranobe PK 32"                                           ~ "Ranobe",
+    "Ambohidray"                                             ~ "Ambohidray",
+    "Ambararata Londa"                                       ~ "Ambararata",
+    "Vohimana"                                               ~ "Vohimana",
+    "Madiro Mirafy"                                          ~ "Madiro Mir",
+    "APC Miary"                                              ~ "APC Miary",
+    "Makay"                                                  ~ "Makay",
+    "Lac Sofia"                                              ~ "Lac Sofia",
+    "Ankafobe"                                               ~ "Ankafobe",
+    "APC Vezo"                                               ~ "APC Vezo",
+    "Beampingaratsy"                                         ~ "Beampinga.",
+    "Ankirihitra"                                            ~ "Ankirihi.",
+    "APC Agnala"                                             ~ "APC Agnala",
+    "APC Loharano"                                           ~ "APC Lohara",
+    "APC Lovasoa"                                            ~ "APC Lovaso",
+    "APC Mikea Mitambatra"                                   ~ "APC Mikea",
+    "Tsinjoarivo Ambalaomby"                                 ~ "Tsinjoariv",
+    "Complexe Bobaomby"                                      ~ "Bobaomby",
+    "Complexe des  AP Ambohimirahavavy Marivorahona"         ~ "Ambohimira",
+    "Andrefana Dry Forests"                                  ~ "Andrefana",
+    "Forêts humides de l’Atsinanana"                         ~ "Atsinanana",
+    "Kirindy Mite"                                           ~ "Kirindy M",
+    "Sahamalaza Iles Radama"                                 ~ "Sahamalaza",
+    "Lokobe"                                                 ~ "Lokobe",
+    "Complexe Zones Humides Mahavavy Kinkony"                ~ "Mahavavy K",
+    "Nosy Antsoha"                                           ~ "Nosy Antso",
+    "Tsinjoriake"                                            ~ "Tsinjoriak",
+    "Mangroves de Tsiribihina"                               ~ "Tsiribihi.",
+    "Bombetoka Beloboka"                                     ~ "Bombetoka",
+    "Ankingabe"                                              ~ "Ankingabe",
+    "Mangroves de la Baie d'Ambaro"                          ~ "Ambaro",
+    "Le Lac Alaotra: les zones humides et basin" ~ "Aloatra ZH",
+    "Parc de Tsarasaotra"                                    ~ "Tsarasaotra",
+    "Rainforests of the Atsinanana"                          ~ "Atsinanana",
+    "Lac Kinkony" ~ "Kinkony",
+    "Mandrozo" ~ "Mandrozo",
+    "Zones Humides de Sahamalaza" ~ "Sahamalaza",
+    "Lac Alaotra" ~ "Alaotra",
+    "Mahialambo" ~ "Mahialambo",
+    .default = NAME
+  )) %>%
+  mutate(
+    MANAGER = case_when(
+      MANG_AUTH %in% c("Ministry of Environment and Sustainable Development", "Not Reported") ~ "Not Reported",
+      MANG_AUTH %in% c("Ministry of Environment and Sustainable Development, MNP", "Madagascar National Parks", "Adresse 1: Madagascar National Parks Lot AI 10C Ambatobe Antananarivo (101)\nAdresse 2: Madagascar National Parks Ankarafantsika Ampijoroanala RN4 Marovay (416)", "Direction de MNP (Toliara)") ~ "Madagascar National Parks",
+      MANG_AUTH %in% c("Ministry of Environment and Sustainable Development, DURRELL", "DURRELL  lot II Y 39 J Ampasanimalo, 101 Antananrivo Madagascar\n DURRELL  lot 14433 Avaradrova Immeuble CECAM AMBATONDRAZAKA, Région Alaotra Mangoro, Madagascar", "Durrell Wildlife Conservation Trust, Programme Madagascar", "Durrell Wildlife Conservation Trust - Madagascar", "DURRELL Madagascar") ~ "Durrell Wildlife Conservation Trust",
+      MANG_AUTH %in% c("Ministry of Environment and Sustainable Development, FANAMBY", "ONG FANAMBY") ~ "Association Fanamby",
+      MANG_AUTH %in% c("Ministry of Environment and Sustainable Development, WWF", "WWF MDCO") ~ "World Wide Fund for Nature",
+      MANG_AUTH %in% c("Ministry of Environment and Sustainable Development, TPF", "The Peregrine Fund") ~ "The Peregrine Fund",
+      MANG_AUTH %in% c("Ministry of Environment and Sustainable Development, MAVOA", "Ministry of Environment and Sustainable Development,MAVOA") ~ "Association Mavoa",
+      MANG_AUTH %in% c("Ministry of Environment and Sustainable Development, LEMURIA LAND", "Ministry of Environment and Sustainable Development, Lemuria Land") ~ "Lemuria Land",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, MBG" ~ "Missouri Botanical Garden",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, WCS" ~ "Wildlife Conservation Society",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, VELONALA Association" ~ "Association Velonala",
+      MANG_AUTH == "Site Bioculturel d'Antrema\nAntananarivo" ~ "Museum National d'Histoire Naturelle",
+      MANG_AUTH == "Association Parc Tsarasaotra (APT)" ~ "Association Parc Tsarasaotra",
+      MANG_AUTH == "Plate-forme de gestion « Filongoa Mandrozo » avec trois COBAs (Communauté Locale de Base) : ZAMAMI, FIVOMA et FIMITOVE." ~ "The Peregrine Fund",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, FBM" ~ "Fikambanana Bongolava Maitso",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, QMM" ~ "QIT Madagascar Minerals",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, SAGE" ~ "Service d'Appui à la Gestion de l'Environnement",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, ESSA FOREST" ~ "Ecole Supérieure des Sciences Agronomiques - Forêts",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, ASITY Mcar" ~ "Asity Madagascar",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, BCM" ~ "Biodiversity Conservation Madagascar",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, THIS" ~ "Conservation International",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, RBG KEW" ~ "Royal Botanic Gardens, Kew",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, FAMELONA Association" ~ "Association Famelona",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, Anjajavy Lodge" ~ "Anjajavy Lodge",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, MICET" ~ "Madagascar Institute for the Conservation of Tropical Environments",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, GERP" ~ "Groupe d'Étude et de Recherche sur les Primates de Madagascar",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, LIVELY" ~ "Association Lively",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, MNHN" ~ "Museum National d'Histoire Naturelle",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, DBEV" ~ "Département de Biologie et Écologie Végétales",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, Man and the Environment" ~ "Man and the Environment",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, Impact Madagascar" ~ "Impact Madagascar",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, Malagasy Miarony Natiora" ~ "Malagasy Miarony Natiora",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, NITIDEA" ~ "Nitidae",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, NGO SADABE" ~ "NGO Sadabe",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, CI" ~ "Conservation International",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, Blue Ventures" ~ "Blue Ventures",
+      MANG_AUTH == "Blue Ventures Madagascar / WWF MDCO" ~ "Blue Ventures / World Wide Fund for Nature",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, TAMIA Association" ~ "Association Tamia",
+      MANG_AUTH == "Ministry of Environment and Sustainable Development, DELC" ~ "Development and Environmental Law Center",
+      TRUE ~ MANG_AUTH
+    ),
+    MANAGER_SHORT = case_when(
+      MANAGER == "Not Reported" ~ "Not Reported",
+      MANAGER == "Madagascar National Parks" ~ "MNP",
+      MANAGER == "Missouri Botanical Garden" ~ "MBG",
+      MANAGER == "Association Fanamby" ~ "Fanamby",
+      MANAGER == "Wildlife Conservation Society" ~ "WCS",
+      MANAGER == "Durrell Wildlife Conservation Trust" ~ "Durell",
+      MANAGER == "Association Velonala" ~ "Velonal",
+      MANAGER == "Site Bioculturel d'Antrema" ~ "SBA",
+      MANAGER == "Association Parc Tsarasaotra" ~ "APT",
+      MANAGER == "Plate-forme de gestion Filongoa Mandrozo" ~ "PFGM",
+      MANAGER == "World Wide Fund for Nature" ~ "WWF",
+      MANAGER == "Fikambanana Bongolava Maitso" ~ "FBM",
+      MANAGER == "QIT Madagascar Minerals" ~ "QMM",
+      MANAGER == "Service d'Appui à la Gestion de l'Environnement" ~ "SAGE",
+      MANAGER == "Ecole Supérieure des Sciences Agronomiques - Forêts" ~ "ESSA-Forêts",
+      MANAGER == "Asity Madagascar" ~ "ASITY",
+      MANAGER == "Biodiversity Conservation Madagascar" ~ "BCM",
+      MANAGER == "Royal Botanic Gardens, Kew" ~ "RBG Kew",
+      MANAGER == "Association Mavoa" ~ "MAVOA",
+      MANAGER == "Association Famelona" ~ "FAMELONA",
+      MANAGER == "The Peregrine Fund" ~ "TPF",
+      MANAGER == "Anjajavy Lodge" ~ "Anjajavy",
+      MANAGER == "Madagascar Institute for the Conservation of Tropical Environments" ~ "MICET",
+      MANAGER == "Groupe d'Étude et de Recherche sur les Primates de Madagascar" ~ "GERP",
+      MANAGER == "Association Lively" ~ "LIVELY",
+      MANAGER == "Museum National d'Histoire Naturelle" ~ "MNHN",
+      MANAGER == "Département de Biologie et Écologie Végétales" ~ "DBEV",
+      MANAGER == "Man and the Environment" ~ "MATE",
+      MANAGER == "Impact Madagascar" ~ "IM",
+      MANAGER == "Malagasy Miarony Natiora" ~ "MMN",
+      MANAGER == "Nitidae" ~ "NITIDAE",
+      MANAGER == "NGO Sadabe" ~ "SADABE",
+      MANAGER == "Conservation International" ~ "CI",
+      MANAGER == "Blue Ventures" ~ "BV",
+      MANAGER == "Blue Ventures / World Wide Fund for Nature" ~ "BV/WWF",
+      MANAGER == "Lemuria Land" ~ "LEMURIA",
+      MANAGER == "Association Tamia" ~ "TAMIA",
+      MANAGER == "Development and Environmental Law Center" ~ "DELC",
+      TRUE ~ MANAGER
+    ),
+    MANAGER_TYPE = case_when(
+      MANAGER_SHORT == "MNP" ~ "MNP",
+      MANAGER_SHORT %in% c("MBG", "WCS", "Durell", "WWF", "RBG Kew", "TPF", "MNHN", "NITIDAE", "CI", "BV", "BV/WWF", "SADABE") ~ "International ONG",
+      MANAGER_SHORT %in% c("Fanamby", "Velonal", "SBA", "APT", "PFGM", "FBM", "SAGE", "ASITY", "BCM", "MAVOA", "FAMELONA", "MICET", "GERP", "LIVELY", "MATE", "IM", "MMN", "TAMIA", "DELC", "QMM", "ESSA-Forêts", "Anjajavy", "DBEV", "LEMURIA") ~ "Local ONG",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  select(
+    WDPAID, NAME, SHORT_NAME, DESIG, IUCN_CAT, STATUS,
+    STATUS_YR, STATUS_YR_PERM, STATUS_YR_WDPA,
+    MANG_AUTH, MANAGER, MANAGER_SHORT, MANAGER_TYPE
+  )
+```
+
+
+### Code in WU 2.1
+
+- Source data: October 2025 WDPA extract and corrected SAPM 2017 shapefile.
+- PA selection: designated PAs after excluding UNESCO-MAB Biosphere Reserves, Ramsar sites, and World Heritage sites.
+- Modifications: standardize selected PA names, set Ambohimirahavavy Marivorahona (`WDPAID == 555697871`) to 2015, and replace WDPA creation years with SAPM 2017 years when the two sources disagree.
+
+
+```{r}
+# Load or create WDPA 2025 data
+wdpa <- wdpa_read("data/WDPA_WDOECM_Oct2025_Public_MDG.zip")
+
+wdpa_2025 <- wdpa %>%
+  filter(STATUS == "Designated") %>%
+  mutate(MARINE = recode(MARINE,
+                         "terrestrial" = "Terrestre",
+                         "marine" = "Marine",
+                         "partial" = "Mixte")) %>%
+  filter(DESIG != "UNESCO-MAB Biosphere Reserve") %>%
+  filter(DESIG != "Ramsar Site, Wetland of International Importance") %>%
+  filter(DESIG != "World Heritage Site (natural or mixed)") %>%
+  
+  st_transform("EPSG:4326")
+
+# Addition of year of creation of the complex Ambohimirahavavy Marivorahona protected areas
+wdpa_2025_mod <- wdpa_2025 %>%
+  mutate(
+    STATUS_YR = if_else(WDPAID == 555697871, 2015L, as.integer(STATUS_YR)),
+    NAME = case_when(
+      NAME == "Zombitse Vohibasia" ~ "Zombitse-Vohibasia",
+      NAME == "Anjanaharibe_sud" ~ "Anjanaharibe-Sud",
+      NAME == "Kalambatrika" ~ "Kalambatritra",
+      TRUE ~ NAME
+    )
+  )
+
+
+# Load SAPM 2017 data for date comparison
+pa_sapm <- st_read("data/SAPM 2017/SAPM_2017_corrected.shp") %>%
+  st_make_valid() %>%
+  st_transform(4326)
+
+# Extract SAPM creation dates by PA name
+sapm_dates <- pa_sapm %>%
+  st_drop_geometry() %>%
+  transmute(
+    NAME = toupper(trimws(SHORT_NAME)),  # Normalize names
+    SAPM_YEAR = lubridate::year(DATE_CREAT)
+  ) %>%
+  distinct(NAME, .keep_all = TRUE)
+
+# Compare and correct WDPA dates with SAPM dates
+pa_wu21 <- wdpa_2025_mod %>%
+  mutate(
+    NAME_NORM = toupper(trimws(NAME)),
+    WDPA_YEAR = STATUS_YR
+  ) %>%
+  left_join(sapm_dates, by = c("NAME_NORM" = "NAME")) %>%
+  mutate(
+    # Use SAPM date if it exists and differs from WDPA
+    STATUS_YR = if_else(!is.na(SAPM_YEAR) & SAPM_YEAR != WDPA_YEAR, 
+                        as.integer(SAPM_YEAR), 
+                        as.integer(WDPA_YEAR)),
+    DATE_SOURCE = case_when(
+      !is.na(SAPM_YEAR) & SAPM_YEAR != WDPA_YEAR ~ "SAPM_2017",
+      TRUE ~ "WDPA_2025"
+    )
+  ) %>%
+  select(-NAME_NORM, -WDPA_YEAR, -SAPM_YEAR)
+rm(pa_sapm, sapm_dates, wdpa, wdpa_2025, wdpa_2025_mod, wdpa_2025_corrected)
+```
+
+### Transformation summary
+
+The three workflows start from different reference versions and make different decisions about which PAs to retain and which source should control the establishment year. The table below summarizes those differences before comparing the final lists directly.
+
+```{r}
+transformation_summary <- tibble(
+  working_unit = c("WU 1.1", "WU 1.2", "WU 2.1"),
+  source_data = c(
+    "WDPA Madagascar July 2025 + legal_texts.rds",
+    "dynamic_wdpa.gpkg",
+    "WDPA Madagascar October 2025 + SAPM 2017 corrected"
+  ),
+  pa_selection = c(
+    "Designated WDPA PAs plus early legal protections; polygon geometries intersecting Madagascar",
+    "Terrestrial and mixed PAs from the dynamic register; Ramsar and inscribed records removed",
+    "Designated national PAs from WDPA; UNESCO-MAB, Ramsar, and World Heritage records removed"
+  ),
+  establishment_year_rule = c(
+    "Use earliest legal year when available, otherwise WDPA STATUS_YR",
+    "Use earliest dynamic status year, while also keeping permanent and WDPA year variants",
+    "Use SAPM 2017 year when it differs from WDPA, otherwise keep WDPA STATUS_YR"
+  ),
+  manual_adjustments = c(
+    "Ambohimirahavavy Marivorahona set to 2015",
+    "Ambohimirahavavy Marivorahona set to 2015; extensive harmonization of names, IUCN category, and managers",
+    "Ambohimirahavavy Marivorahona set to 2015; selected PA names normalized"
+  )
+)
+
+transformation_summary
+```
+
+## Content comparison
+
+```{r}
+normalize_pa_name <- function(x) {
+  x |>
+    stringr::str_to_upper() |>
+    stringr::str_replace_all("[-_']", " ") |>
+    stringr::str_replace_all("[^A-Z0-9 ]", " ") |>
+    stringr::str_squish()
+}
+
+prep_pa_register <- function(data, wu, year_col = STATUS_YR) {
+  data |>
+    sf::st_drop_geometry() |>
+    transmute(
+      wu = wu,
+      WDPAID = as.character(WDPAID),
+      NAME = as.character(NAME),
+      NAME_STD = normalize_pa_name(NAME),
+      STATUS_YR = suppressWarnings(as.integer({{ year_col }}))
+    ) |>
+    distinct(WDPAID, .keep_all = TRUE)
+}
+
+wu11_register <- prep_pa_register(pa_wu11, "WU 1.1")
+
+wu12_register <- pa_wu12 |>
+  transmute(
+    wu = "WU 1.2",
+    WDPAID = as.character(WDPAID),
+    NAME = as.character(NAME),
+    NAME_STD = normalize_pa_name(NAME),
+    STATUS_YR = suppressWarnings(as.integer(STATUS_YR))
+  ) |>
+  distinct(WDPAID, .keep_all = TRUE)
+
+wu21_register <- prep_pa_register(pa_wu21, "WU 2.1")
+
+all_pa_registers <- bind_rows(wu11_register, wu12_register, wu21_register)
+
+presence_wide <- all_pa_registers |>
+  mutate(present = TRUE) |>
+  select(wu, WDPAID, present) |>
+  pivot_wider(names_from = wu, values_from = present, values_fill = FALSE)
+
+name_wide <- all_pa_registers |>
+  select(wu, WDPAID, NAME, NAME_STD) |>
+  pivot_wider(names_from = wu, values_from = c(NAME, NAME_STD))
+
+year_wide <- all_pa_registers |>
+  select(wu, WDPAID, STATUS_YR) |>
+  pivot_wider(names_from = wu, values_from = STATUS_YR, names_prefix = "YEAR_")
+
+pa_comparison <- presence_wide |>
+  left_join(name_wide, by = "WDPAID") |>
+  left_join(year_wide, by = "WDPAID")
+
+pa_counts <- all_pa_registers |>
+  count(wu, name = "n_pa") |>
+  mutate(shared_with_all_three = nrow(pa_comparison |> filter(`WU 1.1`, `WU 1.2`, `WU 2.1`)))
+
+pa_counts
+```
+
+The three WUs do not use the same final PA register. WU 1.1 contains the broadest list, WU 2.1 the narrowest one, and the common intersection should be treated as the stable core list shared across all analyses.
+
+### PAs missing from at least one WU
+
+```{r}
+pa_list_inconsistencies <- pa_comparison |>
+  mutate(n_wu_present = rowSums(pick(`WU 1.1`, `WU 1.2`, `WU 2.1`))) |>
+  filter(n_wu_present < 3) |>
+  transmute(
+    WDPAID,
+    NAME_WU11 = `NAME_WU 1.1`,
+    NAME_WU12 = `NAME_WU 1.2`,
+    NAME_WU21 = `NAME_WU 2.1`,
+    in_wu11 = `WU 1.1`,
+    in_wu12 = `WU 1.2`,
+    in_wu21 = `WU 2.1`
+  ) |>
+  arrange(WDPAID)
+
+pa_list_inconsistencies
+```
+
+### Differences in PA names or establishment years
+
+```{r}
+pa_metadata_inconsistencies <- pa_comparison |>
+  filter(`WU 1.1`, `WU 1.2`, `WU 2.1`) |>
+  rowwise() |>
+  mutate(
+    n_distinct_names = n_distinct(na.omit(c(`NAME_STD_WU 1.1`, `NAME_STD_WU 1.2`, `NAME_STD_WU 2.1`))),
+    n_distinct_years = n_distinct(na.omit(c(`YEAR_WU 1.1`, `YEAR_WU 1.2`, `YEAR_WU 2.1`)))
+  ) |>
+  ungroup() |>
+  filter(n_distinct_names > 1 | n_distinct_years > 1) |>
+  transmute(
+    WDPAID,
+    NAME_WU11 = `NAME_WU 1.1`,
+    NAME_WU12 = `NAME_WU 1.2`,
+    NAME_WU21 = `NAME_WU 2.1`,
+    YEAR_WU11 = `YEAR_WU 1.1`,
+    YEAR_WU12 = `YEAR_WU 1.2`,
+    YEAR_WU21 = `YEAR_WU 2.1`,
+    n_distinct_names,
+    n_distinct_years
+  ) |>
+  arrange(desc(n_distinct_years), desc(n_distinct_names), WDPAID)
+
+pa_metadata_inconsistencies
+```
+
+The table above flags the PAs for which the three WUs disagree on either the PA label or the year of establishment. Rows with `n_distinct_years > 1` are the most urgent because they imply different treatment timing across analyses, while rows with `n_distinct_names > 1` are mainly harmonization issues that can still break joins and comparisons.
+
+### Year inconsistencies to correct first
+
+```{r}
+year_inconsistencies <- pa_metadata_inconsistencies |>
+  filter(n_distinct_years > 1)
+
+year_inconsistencies
+```
