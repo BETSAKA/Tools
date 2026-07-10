@@ -112,7 +112,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Modifications: replace <code>STATUS_YR</code> with the earliest legal year when available and set Ambohimirahavavy Marivorahona (<code>WDPAID == 555697871</code>) to 2015.</li>
 </ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse, <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'dplyr' was built under R version 4.5.3</code></pre>
 </div>
@@ -128,21 +131,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ✖ dplyr::lag()    masks stats::lag()
 ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf, <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Linking to GEOS 3.13.1, GDAL 3.11.0, PROJ 9.6.0; sf_use_s2() is TRUE</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(wdpar)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(wdpar, <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'wdpar' was built under R version 4.5.2</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geodata)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geodata, <span class="at">quietly =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'geodata' was built under R version 4.5.2</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: terra
-terra 1.8.70
+<pre><code>terra 1.8.70
 
 Attaching package: 'terra'
 
@@ -150,6 +161,8 @@ The following object is masked from 'package:tidyr':
 
     extract</code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Systèmes de coordonnées de référence </span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>standard_crs <span class="ot">&lt;-</span> <span class="dv">4326</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>mdg_crs <span class="ot">&lt;-</span> <span class="dv">29702</span> </span>
@@ -213,10 +226,13 @@ The following object is masked from 'package:tidyr':
 <span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>    <span class="at">area_km2 =</span> area_m2 <span class="sc">/</span> <span class="fl">1e6</span></span>
 <span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
 <span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(standard_crs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: attribute variables are assumed to be spatially constant throughout
 all geometries</code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajout de la date de création du complexe des aires protégées Ambohimirahavavy Marivorahona </span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>pa_wu11 <span class="ot">&lt;-</span> wdpa_terrestre <span class="sc">%&gt;%</span></span>
@@ -224,6 +240,7 @@ all geometries</code></pre>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># clean intermediary objects</span></span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(codelist, contour_mada, legal_texts, legal_years, wdpa, wdpa_terrestre)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 </div>
 </section>
 <section id="code-in-wu-1.2" class="level3">
@@ -234,8 +251,11 @@ all geometries</code></pre>
 <li>Modifications: derive <code>STATUS_YR_DYN</code>, collapse multiple status rows to one row per PA, set Ambohimirahavavy Marivorahona (<code>WDPAID == 555697871</code>) to 2015, and harmonize names, IUCN categories, and management authority fields.</li>
 </ul>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(terra)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyterra)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'tidyterra' was built under R version 4.5.3</code></pre>
 </div>
@@ -248,10 +268,15 @@ Attaching package: 'tidyterra'</code></pre>
 
     filter</code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pbapply)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: package 'pbapply' was built under R version 4.5.2</code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pa_wu12 <span class="ot">&lt;-</span> <span class="fu">vect</span>(<span class="st">"data/dynamic_wdpa.gpkg"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(MARINE <span class="sc">%in%</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># "Complexe des  AP Ambohimirahavavy Marivorahona" does not have a STATUS_YR, we set it to 2015 as per WDPA website: https://protectedareas.mg/fr/landscape/show/79?geoShapeFilterField=location&amp;location=48.727807188419%2C-14.2119746670021%2C49.0930733591917%2C-14.2119746670021%2C49.0930733591917%2C-13.734131335043%2C48.727807188419%2C-13.734131335043%2C48.727807188419%2C-14.2119746670021&amp;max=8&amp;mediaFilter=no_of_images%2Cno_of_videos%2Cno_of_audio&amp;offset=0&amp;sort=created_on&amp;view=stats</span></span>
@@ -267,10 +292,13 @@ Attaching package: 'tidyterra'</code></pre>
 <span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DESIG <span class="sc">!=</span> <span class="st">"Ramsar Site, Wetland of International Importance"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(STATUS <span class="sc">!=</span> <span class="st">"Inscribed"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(WDPAID, NAME, DESIG, MANG_AUTH, IUCN_CAT, STATUS, STATUS_YR_DYN, zone_type)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: [vect] returning polygons ignoring additional geometry types. Use
 'svc' to get all geometries</code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">###</span><span class="co"> Load Prioritaire protected areas</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># # Load site prioritaire ap and harmonized variables</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># prioritaire_ap &lt;- vect("./data/source/pa_history_mdg/sapm_evolution_2012/commondata/data1/site_prioritaire_ap.shp") %&gt;%</span></span>
@@ -578,6 +606,7 @@ Attaching package: 'tidyterra'</code></pre>
 <span id="cb22-305"><a href="#cb22-305" aria-hidden="true" tabindex="-1"></a>    STATUS_YR, STATUS_YR_PERM, STATUS_YR_WDPA,</span>
 <span id="cb22-306"><a href="#cb22-306" aria-hidden="true" tabindex="-1"></a>    MANG_AUTH, MANAGER, MANAGER_SHORT, MANAGER_TYPE</span>
 <span id="cb22-307"><a href="#cb22-307" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: There were 9 warnings in `mutate()`.
 The first warning was:
@@ -605,6 +634,8 @@ Caused by warning:
 <li>Modifications: standardize selected PA names, set Ambohimirahavavy Marivorahona (<code>WDPAID == 555697871</code>) to 2015, and replace WDPA creation years with SAPM 2017 years when the two sources disagree.</li>
 </ul>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load or create WDPA 2025 data</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>wdpa <span class="ot">&lt;-</span> <span class="fu">wdpa_read</span>(<span class="st">"data/WDPA_WDOECM_Oct2025_Public_MDG.zip"</span>)</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -637,6 +668,7 @@ Caused by warning:
 <span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>pa_sapm <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/SAPM 2017/SAPM_2017_corrected.shp"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_make_valid</span>() <span class="sc">%&gt;%</span></span>
 <span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">4326</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `SAPM_2017_corrected' from data source 
   `C:\Users\fbede\Documents\Statistiques\Tools\data\SAPM 2017\SAPM_2017_corrected.shp' 
@@ -647,6 +679,8 @@ Dimension:     XY
 Bounding box:  xmin: 58336.43 ymin: 57373.5 xmax: 833924.5 ymax: 1562970
 Projected CRS: laborde</code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract SAPM creation dates by PA name</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>sapm_dates <span class="ot">&lt;-</span> pa_sapm <span class="sc">%&gt;%</span></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
@@ -675,6 +709,7 @@ Projected CRS: laborde</code></pre>
 <span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
 <span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>NAME_NORM, <span class="sc">-</span>WDPA_YEAR, <span class="sc">-</span>SAPM_YEAR)</span>
 <span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(pa_sapm, sapm_dates, wdpa, wdpa_2025, wdpa_2025_mod, wdpa_2025_corrected)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in rm(pa_sapm, sapm_dates, wdpa, wdpa_2025, wdpa_2025_mod,
 wdpa_2025_corrected): object 'wdpa_2025_corrected' not found</code></pre>
@@ -685,6 +720,8 @@ wdpa_2025_corrected): object 'wdpa_2025_corrected' not found</code></pre>
 <h3 class="anchored" data-anchor-id="transformation-summary">Transformation summary</h3>
 <p>The three workflows start from different reference versions and make different decisions about which PAs to retain and which source should control the establishment year. The table below summarizes those differences before comparing the final lists directly.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>transformation_summary <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">working_unit =</span> <span class="fu">c</span>(<span class="st">"WU 1.1"</span>, <span class="st">"WU 1.2"</span>, <span class="st">"WU 2.1"</span>),</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">source_data =</span> <span class="fu">c</span>(</span>
@@ -710,6 +747,7 @@ wdpa_2025_corrected): object 'wdpa_2025_corrected' not found</code></pre>
 <span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>transformation_summary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 5
   working_unit source_data                   pa_selection establishment_year_r…¹
@@ -726,6 +764,8 @@ wdpa_2025_corrected): object 'wdpa_2025_corrected' not found</code></pre>
 <section id="content-comparison" class="level2">
 <h2 class="anchored" data-anchor-id="content-comparison">Content comparison</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>normalize_pa_name <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">|&gt;</span></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    stringr<span class="sc">::</span><span class="fu">str_to_upper</span>() <span class="sc">|&gt;</span></span>
@@ -785,6 +825,7 @@ wdpa_2025_corrected): object 'wdpa_2025_corrected' not found</code></pre>
 <span id="cb31-57"><a href="#cb31-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">shared_with_all_three =</span> <span class="fu">nrow</span>(pa_comparison <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="st">`</span><span class="at">WU 1.1</span><span class="st">`</span>, <span class="st">`</span><span class="at">WU 1.2</span><span class="st">`</span>, <span class="st">`</span><span class="at">WU 2.1</span><span class="st">`</span>)))</span>
 <span id="cb31-58"><a href="#cb31-58" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb31-59"><a href="#cb31-59" aria-hidden="true" tabindex="-1"></a>pa_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 3
   wu      n_pa shared_with_all_three
@@ -798,6 +839,8 @@ wdpa_2025_corrected): object 'wdpa_2025_corrected' not found</code></pre>
 <section id="pas-missing-from-at-least-one-wu" class="level3">
 <h3 class="anchored" data-anchor-id="pas-missing-from-at-least-one-wu">PAs missing from at least one WU</h3>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>pa_list_inconsistencies <span class="ot">&lt;-</span> pa_comparison <span class="sc">|&gt;</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">n_wu_present =</span> <span class="fu">rowSums</span>(<span class="fu">pick</span>(<span class="st">`</span><span class="at">WU 1.1</span><span class="st">`</span>, <span class="st">`</span><span class="at">WU 1.2</span><span class="st">`</span>, <span class="st">`</span><span class="at">WU 2.1</span><span class="st">`</span>))) <span class="sc">|&gt;</span></span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_wu_present <span class="sc">&lt;</span> <span class="dv">3</span>) <span class="sc">|&gt;</span></span>
@@ -813,6 +856,7 @@ wdpa_2025_corrected): object 'wdpa_2025_corrected' not found</code></pre>
 <span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(WDPAID)</span>
 <span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>pa_list_inconsistencies</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 44 × 7
    WDPAID    NAME_WU11               NAME_WU12 NAME_WU21 in_wu11 in_wu12 in_wu21
@@ -834,6 +878,8 @@ wdpa_2025_corrected): object 'wdpa_2025_corrected' not found</code></pre>
 <section id="differences-in-pa-names-or-establishment-years" class="level3">
 <h3 class="anchored" data-anchor-id="differences-in-pa-names-or-establishment-years">Differences in PA names or establishment years</h3>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>pa_metadata_inconsistencies <span class="ot">&lt;-</span> pa_comparison <span class="sc">|&gt;</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">WU 1.1</span><span class="st">`</span>, <span class="st">`</span><span class="at">WU 1.2</span><span class="st">`</span>, <span class="st">`</span><span class="at">WU 2.1</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span></span>
@@ -857,6 +903,7 @@ wdpa_2025_corrected): object 'wdpa_2025_corrected' not found</code></pre>
 <span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n_distinct_years), <span class="fu">desc</span>(n_distinct_names), WDPAID)</span>
 <span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>pa_metadata_inconsistencies</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 76 × 9
    WDPAID    NAME_WU11         NAME_WU12 NAME_WU21 YEAR_WU11 YEAR_WU12 YEAR_WU21
@@ -880,10 +927,13 @@ wdpa_2025_corrected): object 'wdpa_2025_corrected' not found</code></pre>
 <section id="year-inconsistencies-to-correct-first" class="level3">
 <h3 class="anchored" data-anchor-id="year-inconsistencies-to-correct-first">Year inconsistencies to correct first</h3>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>year_inconsistencies <span class="ot">&lt;-</span> pa_metadata_inconsistencies <span class="sc">|&gt;</span></span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_distinct_years <span class="sc">&gt;</span> <span class="dv">1</span>)</span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>year_inconsistencies</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 75 × 9
    WDPAID    NAME_WU11         NAME_WU12 NAME_WU21 YEAR_WU11 YEAR_WU12 YEAR_WU21

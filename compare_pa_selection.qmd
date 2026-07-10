@@ -3,6 +3,7 @@ title: "Comparing Protected Areas selection in 3 BETSAKA Working Units"
 format: 
   html:
     output-file: index.html
+    code-fold: true
 editor_options: 
   chunk_output_type: console
 --- 
@@ -23,10 +24,10 @@ The code used to select the protected areas (PAs) analysed in 3 working packages
 - Modifications: replace `STATUS_YR` with the earliest legal year when available and set Ambohimirahavavy Marivorahona (`WDPAID == 555697871`) to 2015.
 
 ```{r}
-library(tidyverse)
-library(sf)
-library(wdpar)
-library(geodata)
+library(tidyverse, quietly = TRUE)
+library(sf, quietly = TRUE)
+library(wdpar, quietly = TRUE)
+library(geodata, quietly = TRUE)
 
 # Systèmes de coordonnées de référence 
 standard_crs <- 4326
