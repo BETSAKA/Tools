@@ -24,10 +24,14 @@ The code used to select the protected areas (PAs) analysed in 3 working packages
 - Modifications: replace `STATUS_YR` with the earliest legal year when available and set Ambohimirahavavy Marivorahona (`WDPAID == 555697871`) to 2015.
 
 ```{r}
+#| message: false
+#| warning: false
+
 library(tidyverse, quietly = TRUE)
 library(sf, quietly = TRUE)
 library(wdpar, quietly = TRUE)
 library(geodata, quietly = TRUE)
+library(gt, quietly = TRUE)
 
 # Systèmes de coordonnées de référence 
 standard_crs <- 4326
@@ -109,6 +113,9 @@ rm(codelist, contour_mada, legal_texts, legal_years, wdpa, wdpa_terrestre)
 - Modifications: derive `STATUS_YR_DYN`, collapse multiple status rows to one row per PA, set Ambohimirahavavy Marivorahona (`WDPAID == 555697871`) to 2015, and harmonize names, IUCN categories, and management authority fields.
 
 ```{r}
+#| message: false
+#| warning: false 
+
 library(terra)
 library(tidyterra)
 library(pbapply)
@@ -447,6 +454,9 @@ pa_wu12 <- pa_wu12 %>%
 
 
 ```{r}
+#| message: false
+#| warning: false
+
 # Load or create WDPA 2025 data
 wdpa <- wdpa_read("data/WDPA_WDOECM_Oct2025_Public_MDG.zip")
 
@@ -476,7 +486,7 @@ wdpa_2025_mod <- wdpa_2025 %>%
 
 
 # Load SAPM 2017 data for date comparison
-pa_sapm <- st_read("data/SAPM 2017/SAPM_2017_corrected.shp") %>%
+pa_sapm <- st_read("data/SAPM 2017/SAPM_2017_corrected.shp", quiet = TRUE) %>%
   st_make_valid() %>%
   st_transform(4326)
 
@@ -539,7 +549,7 @@ transformation_summary <- tibble(
   )
 )
 
-transformation_summary
+gt(transformation_summary)
 ```
 
 ## Content comparison
@@ -603,10 +613,8 @@ pa_counts <- all_pa_registers |>
   count(wu, name = "n_pa") |>
   mutate(shared_with_all_three = nrow(pa_comparison |> filter(`WU 1.1`, `WU 1.2`, `WU 2.1`)))
 
-pa_counts
+gt(pa_counts)
 ```
-
-The three WUs do not use the same final PA register. WU 1.1 contains the broadest list, WU 2.1 the narrowest one, and the common intersection should be treated as the stable core list shared across all analyses.
 
 ### PAs missing from at least one WU
 
@@ -625,44 +633,27 @@ pa_list_inconsistencies <- pa_comparison |>
   ) |>
   arrange(WDPAID)
 
-pa_list_inconsistencies
+gt(pa_list_inconsistencies)
 ```
 
-### Differences in PA names or establishment years
+### Differences in PA establishment years
 
 ```{r}
 pa_metadata_inconsistencies <- pa_comparison |>
   filter(`WU 1.1`, `WU 1.2`, `WU 2.1`) |>
   rowwise() |>
   mutate(
-    n_distinct_names = n_distinct(na.omit(c(`NAME_STD_WU 1.1`, `NAME_STD_WU 1.2`, `NAME_STD_WU 2.1`))),
     n_distinct_years = n_distinct(na.omit(c(`YEAR_WU 1.1`, `YEAR_WU 1.2`, `YEAR_WU 2.1`)))
   ) |>
   ungroup() |>
-  filter(n_distinct_names > 1 | n_distinct_years > 1) |>
+  filter(n_distinct_years > 1) |>
   transmute(
     WDPAID,
     NAME_WU11 = `NAME_WU 1.1`,
-    NAME_WU12 = `NAME_WU 1.2`,
-    NAME_WU21 = `NAME_WU 2.1`,
     YEAR_WU11 = `YEAR_WU 1.1`,
     YEAR_WU12 = `YEAR_WU 1.2`,
-    YEAR_WU21 = `YEAR_WU 2.1`,
-    n_distinct_names,
-    n_distinct_years
-  ) |>
-  arrange(desc(n_distinct_years), desc(n_distinct_names), WDPAID)
+    YEAR_WU21 = `YEAR_WU 2.1`
+  ) 
 
-pa_metadata_inconsistencies
-```
-
-The table above flags the PAs for which the three WUs disagree on either the PA label or the year of establishment. Rows with `n_distinct_years > 1` are the most urgent because they imply different treatment timing across analyses, while rows with `n_distinct_names > 1` are mainly harmonization issues that can still break joins and comparisons.
-
-### Year inconsistencies to correct first
-
-```{r}
-year_inconsistencies <- pa_metadata_inconsistencies |>
-  filter(n_distinct_years > 1)
-
-year_inconsistencies
+gt(pa_metadata_inconsistencies)
 ```
