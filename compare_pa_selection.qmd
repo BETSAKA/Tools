@@ -3,7 +3,6 @@ title: "Comparing Protected Areas selection in 3 BETSAKA Working Units"
 format: 
   html:
     output-file: index.html
-    output-dir: ../docs
 editor_options: 
   chunk_output_type: console
 --- 
@@ -16,9 +15,6 @@ The code used to select the protected areas (PAs) analysed in 3 working packages
 - `wu_snippets\fire_01_data_acquisition.qmd`
 - `wu_snippets\livelihoods_02_treatment_status.qmd`
 
-```{r}
-knitr::opts_knit$set(root.dir = normalizePath(".."))
-```
 
 ### Code in WU 1.1
 
